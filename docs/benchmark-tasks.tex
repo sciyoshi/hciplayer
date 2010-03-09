@@ -1,0 +1,56 @@
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage{hyperref,amsmath,amsthm,amsfonts,units}
+
+\hypersetup{
+	colorlinks=true,
+    urlcolor=blue
+}
+
+\begin{document}
+
+\title{HCIPlayer: Benchmark Tasks}
+\author{ECSE424 Winter 2010, McGill University}
+\renewcommand{\today}{Updated: Monday, March 8th, 2010}
+\maketitle
+
+\section{Introduction}
+This document outlines the tasks that we expect a user to be able to perform with the HCIPlayer device as well as defining useful metrics for the usability of the device based on the user's performance in these tasks. We also formulate reasonable performance expectations for these tasks.
+
+\section{Ease-of-Learning}
+The ease-of-learning measure is based not only on how easily the user is able to reuse commands to which he/she has been formally introduced, but also the user's ability to generate new, valid commands based on an arbitrary task. This is broken down into more specific steps:
+\subsection{Recollection}
+Once a user has used a command once, he/she is likely to be able to perform the same task again with less hesitation. The ability to do this can be measured in the number of seconds it takes for the user to begin to perform the correct command as well as a count of the number of commands the user may issue in performing the task.
+\begin{center}\begin{tabular}{|r|c|c|c|c|}
+\hline
+ & \multicolumn{2}{|c|}{Trial \#1} & \multicolumn{2}{|c|}{Trial \#2} \\
+\hline
+\textbf{Measure} & \textbf{Expected} & \textbf{Actual} & \textbf{Expected} & \textbf{Actual} \\
+\hline
+\textbf{Time} & 3s & & 6s & \\
+\hline
+\textbf{\# of Attempts} & 1 & & 2 & \\
+\hline
+\end{tabular}\end{center}
+
+\subsection{Creating New Commands}
+The user's ability to create new commands based on previous successes would also be indicative of an easy-to-learn interface since it would mean that there is less practice required to achieve full command over the provided features. Again, time and number of attempts are good metrics for the user's performance, though both have higher expected values than in the case of simple recollection.
+
+\begin{center}\begin{tabular}{|r|c|c|c|c|}
+\hline
+ & \multicolumn{2}{|c|}{Trial \#1} & \multicolumn{2}{|c|}{Trial \#2} \\
+\hline
+\textbf{Measure} & \textbf{Expected} & \textbf{Actual} & \textbf{Expected} & \textbf{Actual} \\
+\hline
+\textbf{Time} & 5s & & 5s & \\
+\hline
+\textbf{\# of Attempts} & 2 & & 2 & \\
+\hline
+\end{tabular}\end{center}
+
+
+\section{Ease-of-Use}
+
+
+
+\end{document}
