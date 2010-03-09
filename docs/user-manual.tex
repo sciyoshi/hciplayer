@@ -15,6 +15,9 @@ HCIPlayer is a portable music player which can be controlled either by using ges
 
 This user manual provides a detailed description of the available system functions, and will be updated as more features are implemented. Features which we plan to implement, but have not yet had time to, are {\color{red} marked in red text}.
 
+\section{Starting The Application}
+First, if a high-speed WIFI network is available, connecting to it will provide a substantial performance boost. To start the application, select the \emph{HCI Music Player} icon on the iPhone main menu. The necessity of a visual icon is a byproduct of the chosen prototype environment and is intended for use by the evaluators only. The system will load and vibrate four times when it is ready to accept input.
+
 \section{Music Playback}
 
 HCIPlayer implements a simple and relatively common playlist-based music player. This is centered around the concept of a \emph{playlist}, which is an ordered list of \emph{tracks} from the \emph{music library} (which is itself a playlist). At any given time, there is an \emph{active playlist}, from which tracks are played in sequence. When HCIPlayer starts, the user's last-active playlist is set as the active playlist. The player also supports \emph{playback shuffle} (which plays the tracks in a random order) and \emph{playback repeat} (which repeatedly plays the current track or playlist).
@@ -48,24 +51,28 @@ The player can also be controlled using voice commands. These provide more power
 	\item Play album \textit{ALBUM}
 	\item Play track or song \textit{TRACK}
 	\end{itemize}
-\item {\color{red}Queue ... -- Add items to the end of the current playlist. This playlist behavior can be overridden by playing a song.
+\item Queue ... -- Add items to the end of the current playlist. This playlist behavior can be overridden by playing a song.
 	\begin{itemize}
 	\item Queue artist \textit{ARTIST}
 	\item Queue album \textit{ALBUM}
 	\item Queue track or song \textit{TRACK}
-	\end{itemize}}
+	\end{itemize}
 \item Pause or Stop -- Pause the playing track.
 \item Next -- Play next track.
 \item Previous -- Play previous track.
 \item Replay -- Replay current track.
 \item Mute or "Turn Mute On/Off" or "Toggle Mute" -- Control the player's mute status.
-\item Shuffle or "Turn Shuffle On/Off" or "Toggle Shuffle" -- Control the way that the playback of a playlist is ordered.
-\item Repeat or "Turn Repeat On/Off" or "Toggle Repeat" -- Control whether or not the player will repeat a playlist once it reaches the end.
+\item {\color{red}Shuffle or "Turn Shuffle On/Off" or "Toggle Shuffle" -- Control the way that the playback of a playlist is ordered.}
+\item {\color{red}Repeat or "Turn Repeat On/Off" or "Toggle Repeat" -- Control whether or not the player will repeat a playlist once it reaches the end.}
 %\item {\color{red} Select artist \textit{ARTIST} and/or album \textit{ALBUM}} 
-\item {\color{red} Info or "What's Playing" or "Now Playing" -- Playback information on current track}
-\item {\color{red} Help or "What Can I Say" or "List Available Commands" or "Help Me" -- List available commands}
+\item Info or "What's Playing" or "Now Playing" -- Playback information on current track
+\item Help or "What Can I Say" or "List Available Commands" or "Help Me" -- List available commands
 
+\end{itemize}
 
+\section{Errata}
+\begin{itemize}
+\item The application may stop responding from time to time. If this happens, restart the application by pressing the button below the screen on the iPhone and re-launching the application. Please note that it may take more than one reload to become functional.
 \end{itemize}
 
 \end{document}

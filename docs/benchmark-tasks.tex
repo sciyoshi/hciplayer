@@ -31,9 +31,8 @@ This goal attempts to quantify how well voice commands are recognized, and is me
 \end{description}
 
 \section{Benchmark Tasks}
-
+These tasks are analog to those asked of the user in the evaluation manual.
 \begin{enumerate}
-
 \item Play a song using gestures.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
@@ -134,6 +133,7 @@ This goal attempts to quantify how well voice commands are recognized, and is me
 \hline
 \end{tabular}\end{center}
 
+
 \item Play a specific song without mentioning an artist.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
@@ -143,6 +143,32 @@ This goal attempts to quantify how well voice commands are recognized, and is me
 \textbf{(VR)} & Number of voice commands attempted & 1 \\
 \hline
 \end{tabular}\end{center}
+
+
+\item Skip to next song by either speech or gesture.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Stop playback.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 8s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 0 \\
+\hline
+\end{tabular}\end{center}
+
 
 \item Stop playback.
 \begin{center}\begin{tabular}{l|l|c}
