@@ -1,6 +1,6 @@
-\documentclass[10pt,letterpaper]{article}
+\documentclass[12pt,letterpaper]{article}
 
-\usepackage{fullpage,amsmath,amsthm,amsfonts,units}
+\usepackage{color,amsmath,amsthm,amsfonts,units}
 
 \begin{document}
 
@@ -10,5 +10,39 @@
 \maketitle
 
 \section{Introduction}
+
+HCIPlayer is a portable music player which can be controlled either by using gestures or by speaking commands. It is implemented as an iPhone application using the user's own music library through the builtin iPod music player.
+
+This user manual provides a detailed description of the available system functions, and will be updated as more features are implemented. Features which we plan to implement, but have not yet had time to, are {\color{red} marked in red text}.
+
+\section{Music Playback}
+
+HCIPlayer implements a simple and relatively common playlist-based music player. This is centered around the concept of a \emph{playlist}, which is an ordered list of \emph{tracks} from the \emph{music library} (which is itself a playlist). At any given time, there is an \emph{active playlist}, from which tracks are played in sequence. When HCIPlayer starts, the user's last-active playlist is set as the active playlist. The player also supports \emph{playback shuffle} (which plays the tracks in a random order) and \emph{playback repeat} (which repeatedly plays the current track or playlist).
+
+\section{Using Gestures}
+
+HCIPlayer supports several gestures which can control music playback. These gestures are performed by tapping or sliding fingers on the touch surface. A \emph{tap-and-swipe} gesture refers to a quick tap followed by a longer swipe or drag starting from the same location.
+
+\begin{itemize}
+\item A single short tap causes the current track to start playing, or if it is already playing, causes the playback to pause.
+\item A single swipe to the left causes the next track in the current playlist to play. If the current track is the last one in the playlist, playback is stopped.
+\item A single swipe to the right causes the previous track in the current playlist to play. If the current track is the first one in the playlist, playback is stopped.
+\item A single swipe downwards mutes the player.
+\item A single swipe upwards unmutes the player, restoring its original volume level.
+\item {\color{red} A tap-and-swipe gesture followed by a vertical motion causes the playback volume to change according to the distance of swipe.}
+\item {\color{red} A tap-and-swipe gesture followed by a horizontal motion causes the player to seek to a different position in the track according to the distance of swipe.}
+\item {\color{red} A question mark gesture (without the dot) causes the device to speak the currently-playing song.}
+\item {\color{red} An alpha gesture ($\alpha$) toggles playback shuffle.}
+\item {\color{red} A circle gesture ($\alpha$) toggles playback repeat.}
+\item Tapping and holding on the screen causes the player to start listening for a voice command. If the finger is moved at any point during the recording, the voice command is cancelled.
+\end{itemize}
+
+\section{Using Voice Commands}
+
+The player can also be controlled using voice commands. These provide more powerful features that are unavailable simply through gestures. A command is activated by tapping and holding the screen, speaking the appropriate command, and then releasing.
+
+\begin{itemize}
+\item 
+\end{itemize}
 
 \end{document}
