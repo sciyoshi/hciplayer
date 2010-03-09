@@ -22,6 +22,7 @@ This document provides the necessary information to conduct usability testing an
 \item Two examiners: the instructor, who will read instructions and interact with the user; and the evaluator, who will observe and fill out evaluation reports
 \item The HCIPlayer prototype (a jailbroken iPhone with the HCIPlayer application installed)
 \item A quiet environment with a fast and reliable WIFI connection
+\item A stopwatch
 \item The \href{http://www.ece.mcgill.ca/~scormi3/hci/docs/user-manual.pdf}{user manual} (PDF)
 \item The \href{http://fluidsurveys.com/s/hciplayer-pretest/}{pre-test questionnaire} (online)
 \item The \href{http://fluidsurveys.com/s/hciplayer-datacollectionsheet/}{data collection sheet} (online)
@@ -30,7 +31,7 @@ This document provides the necessary information to conduct usability testing an
 
 The online questionnaires require an internet connection to fill out. During testing, if the user needs help or is stuck on a task, only information from the User Manual should be provided.
 
-Note: for the purposes of this prototype, the iPhone does not process speech itself; rather, it exchanges data with a remote server, acting only as a microphone in the speech recognition pipeline. Therefore, a fast and reliable WIFI connection must be available to the HCIPlayer during operation. Gesture recognition is handled on the device and any visual feedback provided is for debugging purposes only.
+Note: for the purposes of this prototype, the iPhone does not process speech itself; rather, it exchanges data with a remote server, acting only as a microphone in the speech recognition pipeline. Therefore, a fast and reliable WIFI connection must be available to the HCIPlayer during operation. Gesture recognition is handled on the device and any visuals that appear on the screen are for debugging purposes only.
 
 \section{Test Procedure}
 
@@ -45,34 +46,38 @@ Note: for the purposes of this prototype, the iPhone does not process speech its
 
 \subsection{Test Script}
 
-For each benchmark task, the instructor should read the appropriate instructions below to the user, and the evaluator should fill out the \href{http://fluidsurveys.com/s/hciplayer-datacollectionsheet/}{data collection sheet} with the necessary information.
+For each benchmark task, the instructor should read the appropriate instructions below to the user, and the evaluator should fill out the \href{http://fluidsurveys.com/s/hciplayer-datacollectionsheet/}{data collection sheet} with the necessary information. If the speech recognition makes an error, please note it in the comments. Refer to \href{http://www.ece.mcgill.ca/~scormi3/hci/docs/benchmark-tasks.pdf}{benchmark tasks} (PDF) for evaluation metrics.
 
 \subsubsection{Following Instructions}
-This simple portion of the test has the user follow basic instructions to perform simple operations on the device.
-\begin{enumerate}
+This simple portion of the test has the user follow basic instructions to perform simple operations on the device. \begin{enumerate}
 \item Play the first song in your music library by tapping the screen.
 \item Pause the song by tapping a second time.
 \item Play the next song in your music library by swiping to the right.
 \item Go back to the previous song by swiping to the left.
-\item Play the song \textit{y} by holding a finger steadily on the screen to issue a voice command, then saying "Play artist \textit{x}, song \textit{y}".
-\item Play the album \textit{y} by issuing the voice command, "Play artist \textit{x}, album \textit{y}".
-\item Skip to the next song by issuing the voice command, "next".
+\item Reduce the volume by slowly dragging your finger down the screen.
+\item Play all songs by \textit{Black Eyed Peas} by holding a finger steadily on the screen to issue a voice command, waiting until the device vibrates, then saying "Play artist \textit{Black Eyed Peas}"
+\item Play the song \textit{Poker Face} by issuing the voice command, "Play artist \textit{Lady Gaga}, song \textit{Poker Face}".
 \item Mute the player with a quick swipe downward on the screen.
 \item Restore the volume of the player with a fast upward swipe.
 \end{enumerate}
 
-\subsubsection{Recalling Learned Commands While Conceiving New Ones}
-In this test, we test the ability of the user to use the commands learned in the previous test without providing explicit instructions to do so. Additionally, we introduce variations to these tasks with the expectation that the user will recognize similarity with previously seen commands and formulate a correct command. If the user takes multiple attempts to perform the task, take note of the actions performed and how the player responded to those actions.
+\subsubsection{Recalling Learned Commands \& Formulating New Ones}
+In this set of operations, we test the ability of the user to use the commands learned in the previous test without providing the explicit instructions to do so. Additionally, we introduce variations to these tasks with the expectation that the user will recognize similarity with previously seen commands and formulate a correct command. If the user requires multiple actions to perform the task, take note of the actions performed and how the player responded to those actions. If it takes more than 5 attempts, note what the user tried and offer a command from the user manual.
 \begin{enumerate}
-\item Play the album \textit{y} by \textit{x}
-\item Skip to the next song
+\setcounter{enumi}{9}
+\item Play all songs by the artist \textit{Justin Bieber}
+\item Play a song called \textit{Tik Tok}
+%\item Queue a song called \textit{Do You Remember}
+%\item Skip to the next song
+%\item Slowly reduce the volume
+\item Stop the music
 \end{enumerate}
 
 \subsection{Conclusion}
 
-\begin{enumerate}
-\item The evaluator should administer the \href{http://fluidsurveys.com/s/hciplayer-posttest/}{post-test questionnaire}.
-\end{enumerate}
+%\begin{enumerate}
+The evaluator should administer the \href{http://fluidsurveys.com/s/hciplayer-posttest/}{post-test questionnaire}.
+%\end{enumerate}
 
 \section{User Briefing}
 
