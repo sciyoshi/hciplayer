@@ -17,40 +17,145 @@
 \section{Introduction}
 This document outlines the tasks that we expect a user to be able to perform with the HCIPlayer device as well as defining useful metrics for the usability of the device based on the user's performance in these tasks. We also formulate reasonable performance expectations for these tasks.
 
-\section{Ease-of-Learning}
-The ease-of-learning measure is based not only on how easily the user is able to reuse commands to which he/she has been formally introduced, but also the user's ability to generate new, valid commands based on an arbitrary task. This is broken down into more specific steps:
-\subsection{Recollection}
-Once a user has used a command once, he/she is likely to be able to perform the same task again with less hesitation. The ability to do this can be measured in the number of seconds it takes for the user to begin to perform the correct command as well as a count of the number of commands the user may issue in performing the task.
-\begin{center}\begin{tabular}{|r|c|c|c|c|}
+\section{Usability Goals}
+
+Our usability goals are as follows (more detail can be found in the project notebook):
+
+\begin{description}
+\item[Ease-of-Use (EU)] \hfill \\
+The ease-of-use measure is based on how easily the user is able to perform commands to which he/she has been introduced. This usability goal is measured in the number of seconds it takes for the user to correctly complete a command.
+\item[Effectiveness of Gesture Recognition (GR)] \hfill \\
+This goal attempts to quantify how well gestures are recognized, and is measured in the number of gestures a user makes before the command is successfully recognized.
+\item[Effectiveness of Voice Recognition (VR)] \hfill \\
+This goal attempts to quantify how well voice commands are recognized, and is measured in the number of times the user says a command before it is successfully recognized.
+\end{description}
+
+\section{Benchmark Tasks}
+
+\begin{enumerate}
+
+\item Play a song using gestures.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
- & \multicolumn{2}{|c|}{Trial \#1} & \multicolumn{2}{|c|}{Trial \#2} \\
+\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
 \hline
-\textbf{Measure} & \textbf{Expected} & \textbf{Actual} & \textbf{Expected} & \textbf{Actual} \\
-\hline
-\textbf{Time} & 3s & & 6s & \\
-\hline
-\textbf{\# of Attempts} & 1 & & 2 & \\
+\textbf{(GR)} & Number of gestures attempted & 1 \\
 \hline
 \end{tabular}\end{center}
 
-\subsection{Creating New Commands}
-The user's ability to create new commands based on previous successes would also be indicative of an easy-to-learn interface since it would mean that there is less practice required to achieve full command over the provided features. Again, time and number of attempts are good metrics for the user's performance, though both have higher expected values than in the case of simple recollection.
-
-\begin{center}\begin{tabular}{|r|c|c|c|c|}
+\item Pause a song using gestures.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
- & \multicolumn{2}{|c|}{Trial \#1} & \multicolumn{2}{|c|}{Trial \#2} \\
+\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
 \hline
-\textbf{Measure} & \textbf{Expected} & \textbf{Actual} & \textbf{Expected} & \textbf{Actual} \\
-\hline
-\textbf{Time} & 5s & & 5s & \\
-\hline
-\textbf{\# of Attempts} & 2 & & 2 & \\
+\textbf{(GR)} & Number of gestures attempted & 1 \\
 \hline
 \end{tabular}\end{center}
 
+\item Play next song using gestures.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\end{tabular}\end{center}
 
-\section{Ease-of-Use}
+\item Play previous song using gestures.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\end{tabular}\end{center}
 
+\item Reduce volume using gestures.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 7s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\end{tabular}\end{center}
 
+\item Play all songs by an artist using a voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 13s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Play specific song using a voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 13s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Mute playback using gestures.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Unmute playback using gestures.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Play all songs by a specific artist.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 8s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Play a specific song without mentioning an artist.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 8s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Stop playback.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 8s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 0 \\
+\hline
+\end{tabular}\end{center}
+
+\end{enumerate}
 
 \end{document}
