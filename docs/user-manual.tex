@@ -2,7 +2,7 @@
 \usepackage{color,amsmath,amsthm,amsfonts,graphicx,float,units,subfig,subfloat,anysize}
 \marginsize{2cm}{2cm}{2cm}{2cm}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
-\graphicspath{{./}}
+\graphicspath{{./images/}}
 \begin{document}
 
 \title{HCIPlayer: User Manual}
@@ -25,20 +25,20 @@ This user manual provides a detailed description of the available system functio
 \section{Starting The Application}
 First, if a high-speed WIFI network is available, connecting to it will provide a substantial performance boost. To start the application, select the \emph{HCI Music Player} icon on the iPhone main menu. The necessity of a visual icon is a byproduct of the chosen prototype environment and is intended for use by the evaluators only. The system will load to normal startup after the \emph{HCI Music Player} icon has been pressed.
 \begin{itemize}
-\item If this is the first time a user is starting the software, then an introductory tutorial on how to use the Player will begin as soon as the application has finished loading properly. This tutorial starts by explaining that if the user wishes to skip the tutorial they should press \textit{AMIN PUT WHAT YOU WANT THEM TO PRESS HERE}, then it explains the core functionality of the Player. {\color{blue} The tutorial can be listened to again at any later time by saying ``Tutorial'' as a voice command.}
+\item If this is the first time a user is starting the software, then an introductory tutorial on how to use the Player will begin as soon as the application has finished loading properly. This tutorial starts by explaining that if the user wishes to skip the tutorial he/she should double-tap the screen as instructed, then it explains the core functionality of the Player. {\color{blue} The tutorial can be listened to again at any later time by saying ``Tutorial'' as a voice command.}
 \end{itemize}
 
 \section{Player Operation}
 	
 HCIPlayer implements a simple and relatively common playlist-based music player. This is centered around the concept of a \emph{playlist}, which is an ordered list of \emph{tracks} from the \emph{music library} (which is itself a playlist). At any given time, there is an \emph{active playlist}, from which tracks are played in sequence. When HCIPlayer starts, the user's last-active playlist is set as the active playlist. The player also supports \emph{playback shuffle} (which plays the tracks in a random order) and \emph{playback repeat} (which repeatedly plays the current track or playlist).
 
-When the player starts up and has loaded successfully, it will vibrate 4 times, {\color{magenta} say ``hello''}, and display {\color{red}AMIN PUT WHATEVER IMAGE YOU THINK IS GOOD TO HAVE HERE}.
+When the player starts up and has loaded successfully, it will vibrate 4 times, {\color{magenta} say ``hello''}, and display a ``play'' icon.
 
 
 \subsubsection*{Gestures}
 HCIPlayer supports several gestures which can control music playback. These gestures are performed by tapping or sliding fingers on the touch surface. A \emph{tap-and-swipe} gesture refers to a quick tap followed by a longer swipe or drag starting from the same location.
 \subsubsection*{Voice Commands}
-To issue a voice command, place a finger on the touch surface until the full command has been spoken. A vibration will indicate that the HCIPlayer is ready to accept a voice command. If for some reason or another, the voice command is taking a particularly long time to process, {\color{magenta}this will be indicated by a circle moving around the center of the screen}, as well as {\color{red}AN AUDIO CUE OF SORTS}.
+To issue a voice command, place a finger on the touch surface until the full command has been spoken. A vibration will indicate that the HCIPlayer is ready to accept a voice command. If, for some reason or another, the voice command is taking a particularly long time to process, {\color{magenta}this will be indicated by a circle moving around the center of the screen}, as well as periodic vibration.
 
 \begin{figure}[H]
 	\centering
@@ -66,10 +66,10 @@ Similar to how songs are selected for immediate playback, they can also be appen
 	\item Queue track or song \textit{TRACK}
 	\end{itemize}
 \subsubsection*{Volume}
-Volume is adjusted by {\color{red} DOING SOMETHING ON THE SCREEN}. \\
+Volume is adjusted by swiping up and down accordingly on the screen. \\
 {\color{green} There also used to be a \textbf{mute} function, but this has been obsoleted by the \textbf{pause} function.}
 \subsubsection*{Seeking}
-To navigate through the current track, {\color{red} DO SOMETHING ON THE SCREEN}.
+To navigate through the current track, tap the screen and then drag right or left to \textbf{fast-forward} or \textbf{rewind} respectively.
 \subsubsection*{Replay}
 To restart playback of the current song (\textbf{replay}), issue the voice command `replay'.
 
@@ -110,13 +110,7 @@ To find out what track is currently playing, give any of the voice commands `wha
 	\caption{\emph{Question mark} gesture -- What's playing?}
 \end{figure}
 \subsubsection*{Help!}
-To get a list of available commands, say `help', `what can I say?', `list commands', or `help me'.
-
-
-
-\section{Errata}
-\begin{itemize}
-\item The application may stop responding from time to time. If this happens, restart the application by pressing the button below the screen on the iPhone and re-launching the application. Please note that it may take more than one reload to become functional.
-\end{itemize}
+To get a list of available commands, say `help', `what can I say?', `list commands', or `help me'. \\
+The voice command `tutorial' will start the new user tutorial.
 
 \end{document}
