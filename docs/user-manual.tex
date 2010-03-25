@@ -1,13 +1,20 @@
 \documentclass[12pt,letterpaper]{article}
-
-\usepackage{color,amsmath,amsthm,amsfonts,units}
-
+\usepackage{color,amsmath,amsthm,amsfonts,graphicx,float,units,subfig,subfloat,anysize}
+\marginsize{2cm}{2cm}{2cm}{2cm}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\graphicspath{{./}}
 \begin{document}
 
 \title{HCIPlayer: User Manual}
 \author{ECSE424 Winter 2010, McGill University}
-\renewcommand{\today}{Updated: Monday, March 8th, 2010}
+\renewcommand{\today}{Updated: Wednesday, March 24th, 2010}
 \maketitle
+
+\begin{center}
+{\color{green} Green} sections indicate improvement suggested by the TA \\
+{\color{magenta} Magenta} sections indicate improvement suggested by the team E-Mall \\
+{\color{blue} Blue} sections indicate new features
+\end{center}
 
 \section{Introduction}
 
@@ -16,59 +23,96 @@ HCIPlayer is a portable music player which can be controlled either by using ges
 This user manual provides a detailed description of the available system functions, and will be updated as more features are implemented. Features which we plan to implement, but have not yet had time to, are {\color{red} marked in red text}.
 
 \section{Starting The Application}
-First, if a high-speed WIFI network is available, connecting to it will provide a substantial performance boost. To start the application, select the \emph{HCI Music Player} icon on the iPhone main menu. The necessity of a visual icon is a byproduct of the chosen prototype environment and is intended for use by the evaluators only. The system will load and vibrate four times when it is ready to accept input.
-
-\section{Music Playback}
-
-HCIPlayer implements a simple and relatively common playlist-based music player. This is centered around the concept of a \emph{playlist}, which is an ordered list of \emph{tracks} from the \emph{music library} (which is itself a playlist). At any given time, there is an \emph{active playlist}, from which tracks are played in sequence. When HCIPlayer starts, the user's last-active playlist is set as the active playlist. The player also supports \emph{playback shuffle} (which plays the tracks in a random order) and \emph{playback repeat} (which repeatedly plays the current track or playlist).
-
-\section{Using Gestures}
-
-HCIPlayer supports several gestures which can control music playback. These gestures are performed by tapping or sliding fingers on the touch surface. A \emph{tap-and-swipe} gesture refers to a quick tap followed by a longer swipe or drag starting from the same location.
-
+First, if a high-speed WIFI network is available, connecting to it will provide a substantial performance boost. To start the application, select the \emph{HCI Music Player} icon on the iPhone main menu. The necessity of a visual icon is a byproduct of the chosen prototype environment and is intended for use by the evaluators only. The system will load to normal startup after the \emph{HCI Music Player} icon has been pressed.
 \begin{itemize}
-\item A single short tap causes the current track to start playing, or if it is already playing, causes the playback to pause.
-\item A single swipe to the left causes the next track in the current playlist to play. If the current track is the last one in the playlist, playback is stopped.
-\item A single swipe to the right causes the previous track in the current playlist to play. If the current track is the first one in the playlist, playback is stopped.
-\item A single swipe downwards mutes the player.
-\item A single swipe upwards unmutes the player, restoring its original volume level.
-\item {\color{red} A tap-and-swipe gesture followed by a vertical motion causes the playback volume to change according to the distance of swipe.}
-\item {\color{red} A tap-and-swipe gesture followed by a horizontal motion causes the player to seek to a different position in the track according to the distance of swipe.}
-\item {\color{red} A question mark gesture (without the dot) causes the device to speak the currently-playing song.}
-\item {\color{red} An alpha gesture ($\alpha$) toggles playback shuffle.}
-\item {\color{red} A circle gesture toggles playback repeat.}
-\item Tapping and holding on the screen causes the player to start listening for a voice command. The user must wait for the device to vibrate, signaling that recording has started. If the finger is moved at any point during the recording, the voice command is cancelled. 
+\item If this is the first time a user is starting the software, then an introductory tutorial on how to use the Player will begin as soon as the application has finished loading properly. This tutorial starts by explaining that if the user wishes to skip the tutorial they should press \textit{AMIN PUT WHAT YOU WANT THEM TO PRESS HERE}, then it explains the core functionality of the Player. {\color{blue} The tutorial can be listened to again at any later time by saying ``Tutorial'' as a voice command.}
 \end{itemize}
 
-\section{Using Voice Commands}
+\section{Player Operation}
+	
+HCIPlayer implements a simple and relatively common playlist-based music player. This is centered around the concept of a \emph{playlist}, which is an ordered list of \emph{tracks} from the \emph{music library} (which is itself a playlist). At any given time, there is an \emph{active playlist}, from which tracks are played in sequence. When HCIPlayer starts, the user's last-active playlist is set as the active playlist. The player also supports \emph{playback shuffle} (which plays the tracks in a random order) and \emph{playback repeat} (which repeatedly plays the current track or playlist).
 
-The player can also be controlled using voice commands. These provide more powerful features that are unavailable simply through gestures. A command is activated by tapping and holding the screen until the device vibrates, speaking the appropriate command, and then releasing.
+When the player starts up and has loaded successfully, it will vibrate 4 times, {\color{magenta} say ``hello''}, and display {\color{red}AMIN PUT WHATEVER IMAGE YOU THINK IS GOOD TO HAVE HERE}.
 
+
+\subsubsection*{Gestures}
+HCIPlayer supports several gestures which can control music playback. These gestures are performed by tapping or sliding fingers on the touch surface. A \emph{tap-and-swipe} gesture refers to a quick tap followed by a longer swipe or drag starting from the same location.
+\subsubsection*{Voice Commands}
+To issue a voice command, place a finger on the touch surface until the full command has been spoken. A vibration will indicate that the HCIPlayer is ready to accept a voice command. If for some reason or another, the voice command is taking a particularly long time to process, {\color{magenta}this will be indicated by a circle moving around the center of the screen}, as well as {\color{red}AN AUDIO CUE OF SORTS}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{touch}
+	\caption{Touch \& hold until vibration \\ Enable speech recognition to issue a voice command}
+\end{figure}
+\subsection*{Playback}
+The \textbf{play} or \textbf{pause} actions can be signalled in a number of ways:
 \begin{itemize}
-\item Play -- Play currently active playlist or resume paused or stopped playback. \\ The following may also be used in any combination to play a specific item or set of items in the music collection:
+\item A single short tap causes the current track to start playing, or if it is already playing, causes the playback to pause.
+\item Issuing the voice command `play' or `pause' will perform the desired operation.
+\item The play command allows for a specific artist, album, or song to be selected for immediate playback. \\ The following may also be used in any combination to play a specific item or set of items in the music collection:
 	\begin{itemize}
 	\item Play artist \textit{ARTIST}
 	\item Play album \textit{ALBUM}
 	\item Play track or song \textit{TRACK}
 	\end{itemize}
-\item Queue ... -- Add items to the end of the current playlist. This playlist behavior can be overridden by playing a song.
+\end{itemize}
+\textbf{Stop} may be signalled by issuing the `stop' voice command.
+\subsubsection*{Queueing}
+Similar to how songs are selected for immediate playback, they can also be appended to the current playlist using the \textbf{queue} command. To \textbf{queue} an artist, album, or song, issue the any combination of the following commands:
 	\begin{itemize}
 	\item Queue artist \textit{ARTIST}
 	\item Queue album \textit{ALBUM}
 	\item Queue track or song \textit{TRACK}
 	\end{itemize}
-\item Pause or Stop -- Pause the playing track.
-\item Next -- Play next track.
-\item Previous -- Play previous track.
-\item Replay -- Replay current track.
-\item Mute or "Turn Mute On/Off" or "Toggle Mute" -- Control the player's mute status.
-\item Shuffle or "Turn Shuffle On/Off" or "Toggle Shuffle" -- Control the way that the playback of a playlist is ordered.
-\item Repeat or "Turn Repeat On/Off" or "Toggle Repeat" -- Control whether or not the player will repeat a playlist once it reaches the end.
-%\item {\color{red} Select artist \textit{ARTIST} and/or album \textit{ALBUM}} 
-\item Info or "What's Playing" or "Now Playing" -- Playback information on current track
-\item Help or "What Can I Say" or "List Available Commands" or "Help Me" -- List available commands
+\subsubsection*{Volume}
+Volume is adjusted by {\color{red} DOING SOMETHING ON THE SCREEN}. \\
+{\color{green} There also used to be a \textbf{mute} function, but this has been obsoleted by the \textbf{pause} function.}
+\subsubsection*{Seeking}
+To navigate through the current track, {\color{red} DO SOMETHING ON THE SCREEN}.
+\subsubsection*{Replay}
+To restart playback of the current song (\textbf{replay}), issue the voice command `replay'.
 
-\end{itemize}
+
+\subsection*{Playlist Navigation}
+Navigation to the \textbf{previous} or \textbf{next} track is performed by a swiping gesture accross the surface of the player.
+	\begin{figure}[H]
+		\centering
+		\subfloat[][Swipe left -- \textbf{Previous} track]{\includegraphics[scale=0.6]{left}}
+		\hspace{1in}
+		\subfloat[][Swipe right -- \textbf{Next} track]{\includegraphics[scale=0.6]{right}}
+		\caption{Navigation gestures}
+	\end{figure}
+{\color{green}NOTE: The gestures used to be reversed} \\
+Alternately, the same effect will be achieved by issuing the voice commands, `previous' or `next'. \\
+\subsubsection*{Shuffle}
+The \textbf{shuffle} mode allows for the playlist to, rather than following the prescribed ordering, randomly select each next song. This mode can be toggled by the voice commands `shuffle' or `toggle shuffle'. Alternately it may be set by the commands, `shuffle on/off' or `turn shuffle on/off'. The \emph{alpha} ($\alpha$) gesture also toggles the \textbf{shuffle} mode:
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{alpha}
+	\caption{\emph{Alpha} gesture -- Toggle \textbf{shuffle} mode}
+\end{figure}
+\subsubsection*{Repeat}
+The \textbf{repeat} mode allows for a playlist to repeat itself upon completion. Similar to the \textbf{shuffle} command, \textbf{repeat} can be toggled by the voice commands `repeat' or `toggle repeat'. It may also be set by the commands `repeat on/off' or `turn repeat on/off'. The corresponding \emph{circle} gesture also toggles the \textbf{repeat} mode:
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{circle}
+	\caption{\emph{Circle} gesture -- Toggle \textbf{repeat} mode}
+\end{figure}
+
+\subsection*{Feedback}
+A number of commands exist to help the user figure out the system.
+\subsubsection*{What's Playing?}
+To find out what track is currently playing, give any of the voice commands `what's playing?', `info', `now playing',  or draw a \emph{question mark} on the screen:
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{question}
+	\caption{\emph{Question mark} gesture -- What's playing?}
+\end{figure}
+\subsubsection*{Help!}
+To get a list of available commands, say `help', `what can I say?', `list commands', or `help me'.
+
+
 
 \section{Errata}
 \begin{itemize}
