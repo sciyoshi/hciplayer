@@ -1,0 +1,41 @@
+#JSGF V1.0;
+
+grammar hciplayer;
+
+public <commandList> = <playNewSong> | <queueSongs> | 
+	<play> | <pause> | <next> | <previous> | <replay> |
+	<select> | <unselect> |<list> | 
+	<muteToggle> | <shuffleToggle> | <repeatToggle> | 
+	<info> | <help> ;
+
+
+<playNewSong> = play <filter>;
+<queueSongs> = queue <filter>;
+<play> = play;
+<pause> = pause | stop ;
+<next> = [play] next (song | track | <NULL>) ;
+<previous> = [play] previous (song | track | <NULL>) ;
+<replay> = replay (song | track | <NULL>) ;
+<select> = (select | filter) <filter> *;
+<unselect> = unselect | back | return | exit | up one level ;
+<list> = list (songs | albums | artists | all | <NULL>) ;
+<muteToggle> = (toggle | turn | <NULL>) mute (on|off| <NULL>) | unmute ;
+<shuffleToggle> = (toggle | turn| <NULL>) shuffle (on|off|<NULL>)  ;
+<repeatToggle> = (toggle | turn | <NULL>) repeat (on|off|<NULL>) ;
+<info> = what's playing | what is playing | now playing | info ;
+<help> = list * available commands | what can i say | help me* ;
+
+<filter> =  ( all | (<album> | <song> | <artist>) | (current* (selection | list) | selected) ) +;
+
+<artist> = (artist | <NULL>) (
+{{ARTISTS}}
+) ;
+
+<album> = (album | <NULL> ) (
+{{ALBUMS}}
+) ;
+
+<song> = ( song | track | <NULL>) (
+{{SONGS}}
+) ;
+
