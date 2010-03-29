@@ -15,6 +15,7 @@ import gst
 gobject.threads_init()
 
 from SocketServer import ThreadingMixIn, TCPServer, BaseRequestHandler
+from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
 class Recognizer(object):
 	DICT_FOLDER = os.path.join(os.path.dirname(__file__), 'dict')
@@ -106,22 +107,15 @@ class Recognizer(object):
 
 			return True
 
-class HCIPlayerRequestHandler(BaseRequestHandler):
-	def handle(self):
+class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
+	def do_POST(self):
 		result = [None]
-
-		print '*** INCOMING REQUEST'
 
 		stream = tempfile.NamedTemporaryFile(prefix='hciplayer-', suffix='.aiff', delete=True)
 
-		length = struct.unpack('!L', self.request.recv(4))[0]
+		length = int(self.headers['Content-length'])
 
-		while length:
-			data = self.request.recv(min(4096, length))
-			if not data:
-				break
-			length -= len(data)
-			stream.write(data)
+		stream.write(self.rfile.read(length))
 
 		stream.flush()
 
@@ -135,16 +129,19 @@ class HCIPlayerRequestHandler(BaseRequestHandler):
 
 		finished.wait()
 
-		print '*** RESULT: "%s"' % result[0]
+		self.send_response(200)
+		self.send_header('Content-type', 'text/plain')
+		self.end_headers()
+		self.wfile.write(result[0])
 
-		self.request.send(result[0])
+		print '  --> RESULT: "%s"' % result[0]
 
-class HCIPlayerServer(ThreadingMixIn, TCPServer, object):
+class HCIPlayerServer(HTTPServer, object):
 	allow_reuse_address = True
 
 	def __init__(self, *args, **kwargs):
 		super(HCIPlayerServer, self).__init__(*args, **kwargs)
-		
+
 		self.recognizer = Recognizer()
 
 def main():
