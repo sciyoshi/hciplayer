@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import sys
 import struct
 import tempfile
@@ -28,7 +29,8 @@ class Recognizer(object):
 
 		self.pipeline = gst.parse_launch(' ! '.join([
 			'filesrc name=source',
-			'aiffparse',
+			'wavparse name=parser',
+			'mulawdec name=decode',
 			'audioconvert',
 			'audioresample',
 			'pocketsphinx name=sphinx',
@@ -36,6 +38,8 @@ class Recognizer(object):
 		]))
 
 		self.source = self.pipeline.get_by_name('source')
+		self.parser = self.pipeline.get_by_name('parser')
+		self.decode = self.pipeline.get_by_name('decode')
 		self.sphinx = self.pipeline.get_by_name('sphinx')
 
 		self.sphinx.connect('partial_result', self.on_sphinx_partial_result)
@@ -47,6 +51,8 @@ class Recognizer(object):
 		self.sphinx.props.configured = True
 
 		self.pipeline.auto_clock()
+
+		self.parser.connect('pad_added', self.on_parser_pad_added)
 
 		self.bus = self.pipeline.get_bus()
 		self.bus.add_signal_watch()
@@ -63,6 +69,11 @@ class Recognizer(object):
 	@classmethod
 	def get_file_name(cls, ext):
 		return os.path.join(cls.DICT_FOLDER, cls.DICT_NAME + ext)
+
+	def on_parser_pad_added(self, parser, pad):
+		sink = self.decode.get_pad('sink')
+		if not pad.is_linked() and not sink.is_linked() and pad.can_link(sink):
+			pad.link(sink)
 
 	def on_sphinx_partial_result(self, sphinx, text, uttid):
 		pass
@@ -82,7 +93,7 @@ class Recognizer(object):
 		if msg.type == gst.MESSAGE_EOS:
 			self.pipeline.set_state(gst.STATE_READY)
 			if self.callback:
-				self.callback(msg.structure['text'])
+				self.callback('')
 				self.callback = None
 		elif msg.type == gst.MESSAGE_ERROR:
 			err, debug = msg.parse_error()
@@ -111,7 +122,7 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 	def do_POST(self):
 		result = [None]
 
-		stream = tempfile.NamedTemporaryFile(prefix='hciplayer-', suffix='.aiff', delete=True)
+		stream = tempfile.NamedTemporaryFile(prefix='hciplayer-', suffix='.wav', delete=True)
 
 		length = int(self.headers['Content-length'])
 
@@ -122,10 +133,13 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 		finished = threading.Event()
 
 		def callback(text):
-			result[0] = text.lower()
+			result[0] = re.sub('\(\d+\)', '', text.lower())
 			finished.set()
 
-		self.server.recognizer.recognize(stream.name, callback)
+		if not self.server.recognizer.recognize(stream.name, callback):
+			self.send_response(500)
+			self.end_headers()
+			return
 
 		finished.wait()
 
