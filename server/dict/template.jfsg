@@ -5,8 +5,8 @@ grammar hciplayer;
 public <commandList> = <playNewSong> | <queueSongs> | 
 	<play> | <pause> | <next> | <previous> | <replay> |
 	<select> | <unselect> |<list> | 
-	<muteToggle> | <shuffleToggle> | <repeatToggle> | 
-	<info> | <help> ;
+	<shuffleToggle> | <repeatToggle> | 
+	<info> | <help> | <exit> | <tutorial>;
 
 
 <playNewSong> = play <filter>;
@@ -19,11 +19,12 @@ public <commandList> = <playNewSong> | <queueSongs> |
 <select> = (select | filter) <filter> *;
 <unselect> = unselect | back | return | exit | up one level ;
 <list> = list (songs | albums | artists | all | <NULL>) ;
-<muteToggle> = (toggle | turn | <NULL>) mute (on|off| <NULL>) | unmute ;
 <shuffleToggle> = (toggle | turn| <NULL>) shuffle (on|off|<NULL>)  ;
 <repeatToggle> = (toggle | turn | <NULL>) repeat (on|off|<NULL>) ;
 <info> = what's playing | what is playing | now playing | info ;
 <help> = list * available commands | what can i say | help me* ;
+<exit> = exit | quit ;
+<tutorial> = tutorial ;
 
 <filter> =  ( all | (<album> | <song> | <artist>) | (current* (selection | list) | selected) ) +;
 
