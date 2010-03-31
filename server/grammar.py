@@ -7,9 +7,9 @@ import urlparse
 import tempfile
 import subprocess
 
-artists = ['bonobo', 'radiohead']
-albums = ['animal magic']
-songs = ['sleepy seven', 'dinosaurs']
+artists = ['coldplay', 'tool', 'rage against the machine']
+albums = ['a rush of blood to the head', 'lateralus', 'evil empire']
+songs = ['clocks', 'green eyes', 'the grudge', 'bulls on parade']
 
 jfsg = tempfile.TemporaryFile()
 
