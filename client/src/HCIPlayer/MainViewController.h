@@ -4,6 +4,7 @@
 #import "AudioFeedback.h"
 #import "AudioController.h"
 #import "VoiceRecognizer.h"
+#import "Tutorial.h"
 
 @interface MainViewController : UIViewController <VoiceRecognizerDelegate>
 {
@@ -11,6 +12,7 @@
 	UIImageView *image;
 	MPMusicPlayerController *player;
 	
+	Tutorial *tutorial;
 	AudioController *audio;
 	VoiceRecognizer *voice;
 	AudioFeedback *feedback;

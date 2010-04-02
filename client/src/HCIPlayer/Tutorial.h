@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <MediaPlayer/MPMusicPlayerController.h>
 
+#import "Commands.h"
 #import "AudioFeedback.h"
 #import "AudioController.h"
 #import "VoiceRecognizer.h"
@@ -27,19 +28,21 @@ typedef enum {
 	TUT_REPEAT_ON = 17,	//Similarly, you can make the playlist repeat itself by saying 'turn repeat on'
 	TUT_REPEAT_OFF = 18,	//Now when all of your songs have played, it will start again at the beginning. Try turning this off
 	TUT_DONE = 19
-} tutorial_cmd_t;
+} TutorialState;
 
 @interface Tutorial : NSObject
 {
-	tutorial_cmd_t cmd;
+	Command cmd;
+	TutorialState state;
 	AudioFeedback *feedback;
 }
 
-@property (assign) tutorial_cmd_t cmd;
+@property (assign) Command cmd;
+@property (assign) TutorialState state;
 @property (retain) AudioFeedback *feedback;
 
 -(id)init: (AudioFeedback*)feedback;
--(BOOL) issueCommand: (tutorial_cmd_t) command;
+-(BOOL) issueCommand: (Command) command;
 -(void) runCommand;
 
 @end

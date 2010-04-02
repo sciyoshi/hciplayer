@@ -99,6 +99,11 @@ static NSString *_last_action;
 	}
 }
 
+- (void) commandReplay: (Command) command
+{
+	// FIXXXXXXXXX
+}
+
 - (void) commandNext: (Command) command
 {
 	[self.player skipToNextItem];
@@ -175,8 +180,22 @@ static NSString *_last_action;
 	}
 }
 
+- (void) commandExit: (Command) command
+{
+
+}
+
+- (void) commandTutorial: (Command) command
+{
+	
+}
+
 - (void) handleCommand: (Command) command
 {
+	if (![tutorial handleCommand:command]) {
+		return;
+	}
+
 	if (command.type == COMMAND_TAP) {
 		[self commandTap:command];
 	} else if (command.type == COMMAND_SWIPE_RIGHT) {
@@ -420,6 +439,8 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 	voice.delegate = self;
 
 	feedback = [AudioFeedback new];
+
+	tutorial = [Tutorial new];
 
 	playImage = [[UIImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"media-playback-play" ofType:@"png" inDirectory:@"Images"]];
 	pauseImage = [[UIImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"media-playback-pause" ofType:@"png"inDirectory:@"Images"]];
