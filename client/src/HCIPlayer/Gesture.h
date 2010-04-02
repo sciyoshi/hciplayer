@@ -6,6 +6,8 @@
 #import <UIKit/UILongPressGestureRecognizer.h>
 #import <UIKit/UIPanGestureRecognizer.h>
 
+#import "DTRecognizer.h"
+
 typedef enum {     
 	UIGestureRecognizerStatePossible,           
 	UIGestureRecognizerStateBegan,      
@@ -65,5 +67,16 @@ typedef enum {
 }
 
 - (void) setAngle: (CGFloat) angle;
+
+@end
+
+@interface DollarTouchGestureRecognizer : UIGestureRecognizer
+{
+	NSMutableArray *points;
+	DTRecognizer *recognizer;
+	IBOutlet id resultLabel;
+	DTResult *result;
+}
+@property (retain) DTResult *result;
 
 @end

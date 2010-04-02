@@ -271,3 +271,73 @@
 }
 
 @end
+
+NSArray *NSArrayFromValueArray(CGPoint *points, int length)
+{
+	NSMutableArray *array = [NSMutableArray arrayWithCapacity:length];
+	for (int i = 0; i < length; i++)
+		[array addObject:[NSValue valueWithCGPoint:points[i]]];
+	return array;
+}
+
+
+
+
+@implementation DollarTouchGestureRecognizer
+
+- (id)initWithTarget:(id)target action:(SEL)action {
+	if (self = [super initWithTarget:target action:action]) {		
+		CGPoint circlePoints[] = { CGPointMake(127,141),CGPointMake(124,140),CGPointMake(120,139),CGPointMake(118,139),CGPointMake(116,139),CGPointMake(111,140),CGPointMake(109,141),CGPointMake(104,144),CGPointMake(100,147),CGPointMake(96,152),CGPointMake(93,157),CGPointMake(90,163),CGPointMake(87,169),CGPointMake(85,175),CGPointMake(83,181),CGPointMake(82,190),CGPointMake(82,195),CGPointMake(83,200),CGPointMake(84,205),CGPointMake(88,213),CGPointMake(91,216),CGPointMake(96,219),CGPointMake(103,222),CGPointMake(108,224),CGPointMake(111,224),CGPointMake(120,224),CGPointMake(133,223),CGPointMake(142,222),CGPointMake(152,218),CGPointMake(160,214),CGPointMake(167,210),CGPointMake(173,204),CGPointMake(178,198),CGPointMake(179,196),CGPointMake(182,188),CGPointMake(182,177),CGPointMake(178,167),CGPointMake(170,150),CGPointMake(163,138),CGPointMake(152,130),CGPointMake(143,129),CGPointMake(140,131),CGPointMake(129,136),CGPointMake(126,139) };
+				
+		NSArray *templates = [NSArray arrayWithObjects:
+							  [[[DTTemplate alloc] initWithName:@"circle" points:NSArrayFromValueArray(circlePoints, sizeof(circlePoints)/sizeof(CGPoint)) squareSize:250] autorelease],
+							  nil];
+		recognizer = [[DTRecognizer alloc] initWithSquareSize:250 templates:templates];
+	}
+	return self;
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	points = [[NSMutableArray alloc] init];
+	// Enumerate through all the touch objects.
+	for (UITouch *touch in touches)
+	{
+		CGPoint point = [touch locationInView:touch.view];
+		NSLog(@"touchesBegan %f, %f", point.x, point.y);
+		[points addObject:[NSValue valueWithCGPoint:point]];
+	}	
+}
+
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{  
+	for (UITouch *touch in touches)
+	{
+		CGPoint point = [touch locationInView:touch.view];
+		NSLog(@"touchesMoved %f, %f", point.x, point.y);
+		[points addObject:[NSValue valueWithCGPoint:point]];
+	}
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event { 
+	result = [recognizer recognize:points];
+	NSLog(@"Recognized %@ (%f)", result.name, result.score);
+
+	if (result.score > 0.80){
+		[[self target] performSelector:[self action] withObject:self];
+		self.state = UIGestureRecognizerStateRecognized;
+	} else {
+		self.state = UIGestureRecognizerStateFailed;
+	}
+	[points release];
+	points = nil;
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+	[super touchesCancelled:touches withEvent:event];
+	self.state = UIGestureRecognizerStateFailed;
+}
+
+@end
+
+	

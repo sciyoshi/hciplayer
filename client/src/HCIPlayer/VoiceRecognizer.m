@@ -89,7 +89,11 @@
 
 - (void) startRecognition
 {
-	ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"http://192.168.1.101:9090/"]];
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	NSString *url = [NSString stringWithFormat:@"http://%@:%@/",
+				  [defaults stringForKey:@"ip_address"], 
+				  [defaults stringForKey:@"port"]];
+	ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL: [NSURL URLWithString:url]];
 	[request setShouldStreamPostDataFromDisk:YES];
 	[request appendPostDataFromFile:[[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:@"hciplayer.wav"]];
 	[request setDelegate:self];

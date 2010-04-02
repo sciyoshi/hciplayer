@@ -206,8 +206,8 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 {
 	self.label.text = [[self.player nowPlayingItem] valueForProperty:@"title"];
 	if ([[[self label] text] length] < 1){
+		
 		[[self player] setQueueWithItemCollection:[self currentItems]];
-		[[self player] setNowPlayingItem:[[self currentItems] objectAtIndex:0]];
 		if ([_last_action isEqualToString:@"next"]){
 			[[self feedback] sayText: @"Reached end of queue. Say \"play\" again to restart current list."];
 		}else if ([_last_action isEqualToString: @"previous"]){ 
@@ -299,23 +299,19 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 }
 - (void) handleLeftRight: (ElasticScaleGestureRecognizer *) gesture
 {
-	static is_forward = FALSE;
 	if ([gesture state] == UIGestureRecognizerStateChanged) {
 		float measure = [gesture measure];
+		[self.player endSeeking];
 		if (measure > 0){ 
-			if (is_forward) {
-				[self.player endSeeking];
-				is_forward=FALSE;
+			
 				[self.player beginSeekingBackward];
 				_last_action = @"previous";
-			}
+			
 		} else {
-			if (!is_forward) {
-				[self.player endSeeking];
-				is_forward=TRUE;
+				
 				[self.player beginSeekingForward];
 				_last_action = @"next";
-			}
+			
 		}
 		self.label.text = [NSString stringWithFormat:@"X: %.2f\r\ntime:%.2f", measure, [self.player currentPlaybackTime]];
 		//[self setVibration:TRUE intensity:1 duration:1];
@@ -327,6 +323,13 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 		//restore previous time here!!!
 	}
 }
+
+- (void) handleDT: (DollarTouchGestureRecognizer *) gesture
+{
+	self.label.text = [gesture result];
+	
+}
+
 
 - (void) viewDidLoad
 {
@@ -401,6 +404,8 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 	
 	[tap requireOtherGestureToFail:seek];
 	
+	DollarTouchGestureRecognizer *dt = [[DollarTouchGestureRecognizer alloc] initWithTarget:self action:@selector(handleDT:)];
+	[self.view addGestureRecognizer:dt];
 
 	player = [MPMusicPlayerController iPodMusicPlayer];
 
@@ -421,12 +426,14 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 		selector: @selector(handleVolumeChanged:)
 		name: MPMusicPlayerControllerVolumeDidChangeNotification
 		object: player];
+	
+
 	MPMediaQuery *query = [[MPMediaQuery alloc] init];
 	self.currentItems = [query items];
 	if ([[self player] nowPlayingItem] == NULL){
 		[self.player setQueueWithItemCollection:[MPMediaItemCollection collectionWithItems:self.currentItems]];
 	}
-	
+
 	[player	beginGeneratingPlaybackNotifications];
 
 
