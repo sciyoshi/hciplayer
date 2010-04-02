@@ -73,6 +73,10 @@ AudioFeedback *feedback;
 			SAY("Tap the screen once to begin playback");
 			break;
 		case TUT_ADJUST_VOL:
+			//asfdihawe
+			SAY("");
+			break;
+		case TUT_TAP_AGAIN:
 			SAY("Pause the music again by tapping the screen again");
 			break;
 		case TUT_SAY_PLAY:

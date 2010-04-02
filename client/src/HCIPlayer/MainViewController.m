@@ -75,14 +75,89 @@ static NSString *_last_action;
 	}
 }
 
-- (void) voiceRecordingStopped: (VoiceRecognizer *) recognizer successfully: (BOOL) flag
+/******* COMMANDS *******/
+
+- (void) commandPlay: (Command) command
 {
 	[self.player play];
-	[self.audio finishRecording];
-	[self setImageForPlaybackState];
+	self.label.text = @"PLAY";
 }
 
-- (void) commandHelp
+- (void) commandPause: (Command) command
+{
+	[self.player pause];
+	self.label.text = @"PAUSE";
+}
+
+- (void) commandTap: (Command) command
+{
+	if ([self.player playbackState] == MPMusicPlaybackStatePlaying) {
+		[self commandPause];
+	} else {
+		[self commandPlay];
+	}
+}
+
+- (void) commandNext: (Command) command
+{
+	[self.player skipToNextItem];
+	self.label.text = @"NEXT";
+	_last_action = @"next";
+}
+
+- (void) commandPrevious: (Command) command
+{
+	[self.player skipToPreviousItem];
+	self.label.text = @"PREV";
+	_last_action = @"previous";
+}
+
+- (void) commandUpDown: (ElasticScaleGestureRecognizer *) gesture
+{
+	if ([gesture state] == UIGestureRecognizerStateChanged) {
+		float measure = [gesture measure];
+		float newVolume = MIN(MAX( [self.player volume]+(measure/10000.0), 0), 1);
+		[self.player setVolume:newVolume];
+		if (newVolume <= 0 || newVolume >=1){
+			[gesture setMeasure:0];
+		}
+		self.label.text = [NSString stringWithFormat:@"Y: %.3f\r\nVolume:%.2f", measure, [self.player volume]];
+		//[self setVibration:TRUE intensity:1 duration:1];
+	} else if ([gesture state] == UIGestureRecognizerStateBegan){
+	} else if ([gesture state] == UIGestureRecognizerStateRecognized) {
+		
+	} else if ([gesture state] == UIGestureRecognizerStateCancelled) {
+		
+	}
+}
+- (void) commandLeftRight: (ElasticScaleGestureRecognizer *) gesture
+{
+	if ([gesture state] == UIGestureRecognizerStateChanged) {
+		float measure = [gesture measure];
+		[self.player endSeeking];
+		if (measure > 0){ 
+			
+				[self.player beginSeekingBackward];
+				_last_action = @"previous";
+			
+		} else {
+				
+				[self.player beginSeekingForward];
+				_last_action = @"next";
+			
+		}
+		self.label.text = [NSString stringWithFormat:@"X: %.2f\r\ntime:%.2f", measure, [self.player currentPlaybackTime]];
+		//[self setVibration:TRUE intensity:1 duration:1];
+	} else if ([gesture state] == UIGestureRecognizerStateBegan){
+	} else if ([gesture state] == UIGestureRecognizerStateRecognized) {
+		[self.player endSeeking];
+	} else  {
+		[self.player endSeeking];
+		//restore previous time here!!!
+	}
+}
+
+- (void) commandHelp: (Command *) command
 {
 	[self.feedback sayText:@"You can say things like, play, pause, repeat, \
 	 next song, play previous, re-play track, and toggle mute. To play or \
@@ -101,10 +176,42 @@ static NSString *_last_action;
 
 - (void) handleCommand: (Command) command
 {
-	if (command.type == COMMAND_HELP) {
-		[self commandHelp];
+	if (command.type == COMMAND_TAP) {
+		[self commandTap:command];
+	} else if (command.type == COMMAND_SWIPE_RIGHT) {
+		[self commandSwipeRight:command.gesture];
+	} else if (command.type == COMMAND_SWIPE_LEFT) {
+		[self commandSwipeLieft:command.gesture];
+	} else if (command.type == COMMAND_SWIPE_UP_DOWN) {
+		[self commandUpDown:command.gesture];
+	} else if (command.type == COMMAND_SwIPE_LEFT_RIGHT) {
+		[self commandSwipeLeftRight:command.gesture];
+	} else if (command.type == COMMAND_PLAY) {
+		[self commandPlay:command];
+	} else if (command.type == COMMAND_PAUSE) {
+		[self commandPause:command];
+	} else if (command.type == COMMAND_NEXT) {
+		[self commandNext:command];
+	} else if (command.type == COMMAND_PREVIOUS) {
+		[self commandPrevious:command];
+	} else if (command.type == COMMAND_REPLAY) {
+		[self commandReplay:command];
 	} else if (command.type == COMMAND_INFO) {
-		[self commandInfo];
+		[self commandInfo:command];
+	} else if (command.type == COMMAND_HELP) {
+		[self commandHelp:command];
+	} else if (command.type == COMMAND_EXIT) {
+		[self commandExit:command];
+	} else if (command.type == COMMAND_TUTORIAL) {
+		[self commandTutorial:command];
+	} else if (command.type == COMMAND_SHUFFLE) {
+		[self commandShuffle:command];
+	} else if (command.type == COMMAND_REPEAT) {
+		[self commandRepeat:command];
+	} else if (command.type == COMMAND_PLAY_ITEMS) {
+		[self commandPlayItems:command];
+	} else if (command.type == COMMAND_QUEUE_ITEMS) {
+		[self commandPlayItems:command];
 	}
 }
 
@@ -227,30 +334,37 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 {
 
 }
+
+/**** GESTURE HANDLERS ****/
+
+- (void) handleTap: (UIGestureRecognizer *) gesture
+{
+	Command c = { .type = COMMAND_HANDLE_TAP, .gesture = gesture };
+	[self handleCommand:c];
+}
+
 - (void) handleRight: (UIGestureRecognizer *) gesture
 {
-	[self.player skipToNextItem];
-	self.label.text = @"NEXT";
-	_last_action = @"next";
+	Command c = { .type = COMMAND_SWIPE_RIGHT, .gesture = gesture };
+	[self handleCommand:c];
 }
 
 - (void) handleLeft: (UIGestureRecognizer *) gesture
 {
-	[self.player skipToPreviousItem];
-	self.label.text = @"PREV";
-	_last_action = @"previous";
+	Command c = { .type = COMMAND_SWIPE_LEFT, .gesture = gesture };
+	[self handleCommand:c];
 }
 
-- (void) handleTap: (UIGestureRecognizer *) gesture
+- (void) handleUpDown: (ElasticScaleGestureRecognizer *) gesture
 {
-	
-	if ([self.player playbackState] == MPMusicPlaybackStatePlaying) {
-		[self.player pause];
-		self.label.text = @"PAUSE";
-	} else {
-		[self.player play];
-		self.label.text = @"PLAY";
-	}
+	Command c = { .type = COMMAND_SWIPE_UPDOWN, .gesture = gesture };
+	[self handleCommand:c];	
+}
+
+- (void) handleLeftRight: (ElasticScaleGestureRecognizer *) gesture
+{
+	Command c = { .type = COMMAND_SWIPE_LEFTRIGHT, .gesture = gesture };
+	[self handleCommand:c];
 }
 
 - (void) handleHold: (UILongPressGestureRecognizer *) gesture
@@ -279,49 +393,13 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 	}
 }
 
-- (void) handleUpDown: (ElasticScaleGestureRecognizer *) gesture
+
+
+- (void) voiceRecordingStopped: (VoiceRecognizer *) recognizer successfully: (BOOL) flag
 {
-	if ([gesture state] == UIGestureRecognizerStateChanged) {
-		float measure = [gesture measure];
-		float newVolume = MIN(MAX( [self.player volume]+(measure/10000.0), 0), 1);
-		[self.player setVolume:newVolume];
-		if (newVolume <= 0 || newVolume >=1){
-			[gesture setMeasure:0];
-		}
-		self.label.text = [NSString stringWithFormat:@"Y: %.3f\r\nVolume:%.2f", measure, [self.player volume]];
-		//[self setVibration:TRUE intensity:1 duration:1];
-	} else if ([gesture state] == UIGestureRecognizerStateBegan){
-	} else if ([gesture state] == UIGestureRecognizerStateRecognized) {
-		
-	} else if ([gesture state] == UIGestureRecognizerStateCancelled) {
-		
-	}
-}
-- (void) handleLeftRight: (ElasticScaleGestureRecognizer *) gesture
-{
-	if ([gesture state] == UIGestureRecognizerStateChanged) {
-		float measure = [gesture measure];
-		[self.player endSeeking];
-		if (measure > 0){ 
-			
-				[self.player beginSeekingBackward];
-				_last_action = @"previous";
-			
-		} else {
-				
-				[self.player beginSeekingForward];
-				_last_action = @"next";
-			
-		}
-		self.label.text = [NSString stringWithFormat:@"X: %.2f\r\ntime:%.2f", measure, [self.player currentPlaybackTime]];
-		//[self setVibration:TRUE intensity:1 duration:1];
-	} else if ([gesture state] == UIGestureRecognizerStateBegan){
-	} else if ([gesture state] == UIGestureRecognizerStateRecognized) {
-		[self.player endSeeking];
-	} else  {
-		[self.player endSeeking];
-		//restore previous time here!!!
-	}
+	[self.player play];
+	[self.audio finishRecording];
+	[self setImageForPlaybackState];
 }
 
 - (void) handleDT: (DollarTouchGestureRecognizer *) gesture
@@ -435,10 +513,9 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 	}
 
 	[player	beginGeneratingPlaybackNotifications];
-
-
 	
 	[self setImageForPlaybackState];
 }
 
 @end
+
