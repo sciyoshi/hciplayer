@@ -38,7 +38,7 @@
 	if (self = [super initWithTarget:target action:action]) {
 		_angle.x = 1.0;
 		_angle.y = 0.0;
-		_minDistance = 80;
+		_minDistance = 40;
 		_aspect.x = 0.8;
 		_aspect.y = 1;
 		_max = 0;
@@ -74,17 +74,18 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	[super touchesMoved:touches withEvent:event]; 
 	if ([[touches anyObject] tapCount] != _numberOfTaps || self.state == UIGestureRecognizerStateCancelled) {
-		NSArray *args = [NSArray arrayWithObjects:touches, event, nil];
+		NSArray *args = [NSArray arrayWithObjects:[NSSet setWithSet:touches], event, nil];
 		
         [self performSelector:@selector(endTouches:) withObject:args afterDelay:[self delay]];
 		return;
 	}
+	[NSObject cancelPreviousPerformRequestsWithTarget:self];
 	
 	CGFloat elapsed = 0-[_startTime timeIntervalSinceNow] ;
 	
 	
 	CGPoint loc = [[touches anyObject] locationInView:self.view];
-	CGFloat x = _location.x;
+	CGFloat x = _location.x, y = _location.y;
 	
 	loc.x -= _start.x;
 	loc.y -= _start.y;
@@ -93,14 +94,14 @@
 	_location.y = loc.y * _angle.x - loc.x * _angle.y;
 	_max = MAX(abs(_location.x), _max);
 	if (_location.x >= x ){
-		_measure = _measure  - abs(x - _location.x ) / MIN(MAX(elapsed,0.85),1.00);
+		_measure = _measure  - abs(x - _location.x ) / MIN(MAX(elapsed,1.5),2.00);
 	} else {
-		_measure = _measure  + abs(x - _location.x ) / MIN(MAX(elapsed,0.85),1.00);
+		_measure = _measure  + abs(x - _location.x ) / MIN(MAX(elapsed,1.5),2.00);
 	}
 	
 	
 	_startTime = [[NSDate alloc] init];
-	
+
 	if (self.state == UIGestureRecognizerStatePossible ) {
 		if (abs(_max) > _minDistance) {
 			[NSObject cancelPreviousPerformRequestsWithTarget:self];
@@ -108,16 +109,23 @@
 		}
 	} else if (abs(_location.y) > abs(_location.x) * _aspect.y + _minDistance) {
 		self.state = UIGestureRecognizerStateCancelled;		
-		NSArray *args = [NSArray arrayWithObjects:touches, event, nil];
+		NSArray *args = [NSArray arrayWithObjects:[NSSet setWithSet:touches], event, nil];
 		
         [self performSelector:@selector(endTouches:) withObject:args afterDelay:[self delay]];
+	} else if (self.state == UIGestureRecognizerStateBegan){
+		self.state = UIGestureRecognizerStateChanged;
+	}
+	if (self.state == UIGestureRecognizerStateChanged){
+		NSArray *args = [NSArray arrayWithObjects:[NSSet setWithSet:touches], event, nil];
+		
+		[self performSelector:@selector(moveTouches:) withObject:args afterDelay:0.1];
 	}
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	if (self.state == UIGestureRecognizerStatePossible && [[touches anyObject] tapCount] == [self numberOfTaps]) {
 		self.state = UIGestureRecognizerStateFailed;
 	}
-	NSArray *args = [NSArray arrayWithObjects:touches, event, nil];
+	NSArray *args = [NSArray arrayWithObjects:[NSSet setWithSet:touches], event, nil];
 	
 	[self performSelector:@selector(endTouches:) withObject:args afterDelay:[self delay]];
 }
@@ -126,6 +134,11 @@
 	self.state = UIGestureRecognizerStateFailed;
 }
 
+- (void)moveTouches:(NSArray *)args {
+    [self _clearUpdateTimer];
+	[[self target] performSelector:[self action] withObject:self];
+	[self touchesMoved:[args objectAtIndex:0] withEvent:[args objectAtIndex:1]];
+}
 - (void)endTouches:(NSArray *)args {
     [self _clearUpdateTimer];	
 	[super touchesEnded:[args objectAtIndex:0] withEvent:[args objectAtIndex:1]];

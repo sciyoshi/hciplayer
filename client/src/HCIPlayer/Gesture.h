@@ -2,8 +2,8 @@
 #import <UIKit/UIKit.h>
 
 #import <UIKit/UIGestureRecognizer.h>
-#import <UIKit/UIGestureRecognizer.h>
-
+#import <UIKit/UITapGestureRecognizer.h>
+#import <UIKit/UILongPressGestureRecognizer.h>
 #import <UIKit/UIPanGestureRecognizer.h>
 
 typedef enum {     
@@ -42,7 +42,7 @@ typedef enum {
 
 }
 @property (assign) CGPoint location;
-@property (assign,readonly) CGFloat measure;
+@property (assign) CGFloat measure;
 - (void) setAngle: (CGFloat) angle;
 
 - (int) numberOfTaps;

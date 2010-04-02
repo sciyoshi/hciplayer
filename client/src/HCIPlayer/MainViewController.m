@@ -2,14 +2,16 @@
 
 #import "HCIPlayerAppDelegate.h"
 #import "VoiceRecognizer.h"
-#import "Gestures.h"
-
+#import "Gesture.h"
+#import <UIKit/UIView-UIViewGestures.h>
 #import <Celestial/Celestial.h>
-
+#import <AudioToolbox/AudioServices.h>
 #import <time.h>
 
 
 @implementation MainViewController
+
+
 
 @synthesize label;
 @synthesize image;
@@ -18,14 +20,17 @@
 @synthesize audio;
 @synthesize voice;
 @synthesize feedback;
+@synthesize currentItems;
 
 /* Prototypes */
 extern void * _CTServerConnectionCreate(CFAllocatorRef, int (*)(void *, CFStringRef, CFDictionaryRef, void *), int *);
 extern int _CTServerConnectionSetVibratorState(int *, void *, int, float, float, float, float);
+static NSString *_last_action;
+
 
 - (void) loadView
 {
-	UIView *view = self.view = [[GestureView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]];
+	UIView *view = self.view = [[UIView	alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]];
 
 	self.image = [[UIImageView alloc] initWithFrame:CGRectInset([view bounds], 20, 20)];
 	self.image.opaque = NO;
@@ -39,7 +44,7 @@ extern int _CTServerConnectionSetVibratorState(int *, void *, int, float, float,
 	CGRect rect = CGRectInset([view bounds], 20, 0);
 
 	rect.origin.y += rect.size.height - 60.0;
-	rect.size.height = 40.0;
+	rect.size.height = 60.0;
 
 	self.label = [[UILabel alloc] initWithFrame:rect];
 	self.label.backgroundColor = [UIColor clearColor];
@@ -47,9 +52,10 @@ extern int _CTServerConnectionSetVibratorState(int *, void *, int, float, float,
 	self.label.clearsContextBeforeDrawing = NO;
 	self.label.textColor = [UIColor whiteColor];
 	self.label.textAlignment = UITextAlignmentCenter;
-	self.label.font = [UIFont systemFontOfSize:32.0];
+	self.label.font = [UIFont systemFontOfSize:24.0];
 	self.label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
-
+	self.label.numberOfLines = 4;
+	self.label.lineBreakMode = UILineBreakModeWordWrap; 
 	[view addSubview:self.label];
 }
 
@@ -239,43 +245,61 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
     NSLog ([NSString stringWithFormat:@"enabled: %i, pattern:%@", [avc vibrationEnabled], [avc vibrationPattern]]);
 }
 
-- (void) handleNowPlayingItemChanged: (id) notification
+- (void) handleNowPlayingItemChanged: (NSNotification *) notification
 {
 	self.label.text = [[self.player nowPlayingItem] valueForProperty:@"title"];
+	if ([[[self label] text] length] < 1){
+		[[self player] setQueueWithItemCollection:[self currentItems]];
+		[[self player] setNowPlayingItem:[[self currentItems] objectAtIndex:0]];
+		if ([_last_action isEqualToString:@"next"]){
+			[[self feedback] sayText: @"Reached end of queue. Say \"play\" again to restart current list."];
+		}else if ([_last_action isEqualToString: @"previous"]){ 
+			[self.player play];
+		}
+	}
 }
 
 - (void) handlePlaybackStateChanged: (id) notification
 {
 	[self setImageForPlaybackState];
+	NSLog (@"enabled: %@", [notification description]);
+	
 }
 
 - (void) handleVolumeChanged: (id) notification
 {
 
 }
-
-- (void) handleRight: (Gesture *) gesture
+- (void) handleRight: (UIGestureRecognizer *) gesture
 {
 	[self.player skipToNextItem];
+	self.label.text = @"NEXT";
+	_last_action = @"next";
 }
 
-- (void) handleLeft: (Gesture *) gesture
+- (void) handleLeft: (UIGestureRecognizer *) gesture
 {
 	[self.player skipToPreviousItem];
+	self.label.text = @"PREV";
+	_last_action = @"previous";
 }
 
-- (void) handleTap: (Gesture *) gesture
+- (void) handleTap: (UIGestureRecognizer *) gesture
 {
+	
 	if ([self.player playbackState] == MPMusicPlaybackStatePlaying) {
 		[self.player pause];
+		self.label.text = @"PAUSE";
 	} else {
 		[self.player play];
+		self.label.text = @"PLAY";
 	}
 }
 
-- (void) handleHold: (Gesture *) gesture
+- (void) handleHold: (UILongPressGestureRecognizer *) gesture
 {
-	if ([gesture state] == GESTURE_STATE_STARTED) {
+	NSLog([gesture description]);
+	if ([gesture state] == UIGestureRecognizerStateBegan) {
 		NSLog(@"1..");
 		[self.audio prepareForRecording];
 		NSLog(@"1.5");
@@ -287,28 +311,63 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 		NSLog(@"5..");
 		[self.voice start];
 		NSLog(@"6..");
-	} else if ([gesture state] == GESTURE_STATE_RECOGNIZED) {
+	} else if ([gesture state] == UIGestureRecognizerStateRecognized) {
 		[self.voice finish];
 		//[self setVibration:TRUE intensity:1 duration:1];
-	} else if ([gesture state] == GESTURE_STATE_CANCELLED) {
+	} else if ([gesture state] == UIGestureRecognizerStateCancelled) {
 		[self.voice cancel];
-		[self vibrate];
+		//[self vibrate];
 		//[self setVibration:TRUE intensity:1 duration:0.2];
 		//[self setVibration:TRUE intensity:1 duration:0.2];
 	}
 }
 
-- (void) handleUpDown: (SwipeGesture *) gesture
+- (void) handleUpDown: (ElasticScaleGestureRecognizer *) gesture
 {
-	if ([gesture state] == GESTURE_STATE_UPDATED) {
-		CGPoint position = [gesture position];
-		self.label.text = [NSString stringWithFormat:@"%@, %@", [NSNumber numberWithInt:position.x], [NSNumber numberWithInt:position.y]];
+	if ([gesture state] == UIGestureRecognizerStateChanged) {
+		float measure = [gesture measure];
+		float newVolume = MIN(MAX( [self.player volume]+(measure/10000.0), 0), 1);
+		[self.player setVolume:newVolume];
+		if (newVolume <= 0 || newVolume >=1){
+			[gesture setMeasure:0];
+		}
+		self.label.text = [NSString stringWithFormat:@"Y: %.3f\r\nVolume:%.2f", measure, [self.player volume]];
 		//[self setVibration:TRUE intensity:1 duration:1];
-	} else if ([gesture state] == GESTURE_STATE_STARTED){
-	} else if ([gesture state] == GESTURE_STATE_RECOGNIZED) {
+	} else if ([gesture state] == UIGestureRecognizerStateBegan){
+	} else if ([gesture state] == UIGestureRecognizerStateRecognized) {
 		
-	} else if ([gesture state] == GESTURE_STATE_CANCELLED) {
+	} else if ([gesture state] == UIGestureRecognizerStateCancelled) {
 		
+	}
+}
+- (void) handleLeftRight: (ElasticScaleGestureRecognizer *) gesture
+{
+	static is_forward = FALSE;
+	if ([gesture state] == UIGestureRecognizerStateChanged) {
+		float measure = [gesture measure];
+		if (measure > 0){ 
+			if (is_forward) {
+				[self.player endSeeking];
+				is_forward=FALSE;
+				[self.player beginSeekingBackward];
+				_last_action = @"previous";
+			}
+		} else {
+			if (!is_forward) {
+				[self.player endSeeking];
+				is_forward=TRUE;
+				[self.player beginSeekingForward];
+				_last_action = @"next";
+			}
+		}
+		self.label.text = [NSString stringWithFormat:@"X: %.2f\r\ntime:%.2f", measure, [self.player currentPlaybackTime]];
+		//[self setVibration:TRUE intensity:1 duration:1];
+	} else if ([gesture state] == UIGestureRecognizerStateBegan){
+	} else if ([gesture state] == UIGestureRecognizerStateRecognized) {
+		[self.player endSeeking];
+	} else  {
+		[self.player endSeeking];
+		//restore previous time here!!!
 	}
 }
 
@@ -323,12 +382,10 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 
 	feedback = [AudioFeedback new];
 
-	GestureView *view = (GestureView *) self.view;
-
 	playImage = [[UIImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"media-playback-play" ofType:@"png" inDirectory:@"Images"]];
 	pauseImage = [[UIImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"media-playback-pause" ofType:@"png"inDirectory:@"Images"]];
 	recordImage = [[UIImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"audio-input-microphone" ofType:@"png"inDirectory:@"Images"]];
-
+/*
 	Gesture *gesture = [[LongPressGesture alloc] initWithTarget:self selector:@selector(handleHold:)];
 	((LongPressGesture *) gesture).onRelease = NO;
 	[view addGesture:gesture];
@@ -355,12 +412,14 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 	((LongPressGesture *) gesture).delay = 0.25;
 	[view addGesture:gesture];
 
-	/*
+	*/
 	UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
 	[tap setNumberOfTaps:1];
 	[self.view addGestureRecognizer:tap];
 	
 	UILongPressGestureRecognizer *hold = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleHold:)];
+	hold.allowableMovement = 10;
+	hold.delay = 0.5;
 	[self.view addGestureRecognizer:hold];
 	
 	SwipeGestureRecognizer *left = [[SwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleLeft:)];
@@ -370,20 +429,21 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 	[left setAngle: M_PI];
 	[self.view addGestureRecognizer:right];
 	
-	ElasticScaleGestureRecognizer *seek = [[ElasticScaleGestureRecognizer alloc] initWithTarget:self action:@selector(handleSeek:)];
+	ElasticScaleGestureRecognizer *seek = [[ElasticScaleGestureRecognizer alloc] initWithTarget:self action:@selector(handleLeftRight:)];
+	[seek setAngle: M_PI];
 	[seek setNumberOfTaps:2];
 	[seek setDelay:0.4];
 	[self.view addGestureRecognizer:seek];	
 	
 	
-	ElasticScaleGestureRecognizer *volume = [[ElasticScaleGestureRecognizer alloc] initWithTarget:self action:@selector(handleVolume:)];
+	ElasticScaleGestureRecognizer *volume = [[ElasticScaleGestureRecognizer alloc] initWithTarget:self action:@selector(handleUpDown:)];
 	[volume setAngle: M_PI_2];
 	[volume setNumberOfTaps:1];
 	[volume setDelay:0.1];
 	[self.view addGestureRecognizer:volume];
 	
 	[tap requireOtherGestureToFail:seek];
-	*/	
+	
 
 	player = [MPMusicPlayerController iPodMusicPlayer];
 
@@ -404,9 +464,14 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 		selector: @selector(handleVolumeChanged:)
 		name: MPMusicPlayerControllerVolumeDidChangeNotification
 		object: player];
-
-	[player	beginGeneratingPlaybackNotifications];
+	MPMediaQuery *query = [[MPMediaQuery alloc] init];
+	self.currentItems = [query items];
+	if ([[self player] nowPlayingItem] == NULL){
+		[self.player setQueueWithItemCollection:[MPMediaItemCollection collectionWithItems:self.currentItems]];
+	}
 	
+	[player	beginGeneratingPlaybackNotifications];
+
 
 	
 	[self setImageForPlaybackState];

@@ -284,7 +284,7 @@
 		self.state = GESTURE_STATE_RECOGNIZED;
 		return;
 	}
-
+ 
 	for (UITouch *touch in touches) {
 		[_activeTouches removeObjectForKey:touch];
 	}
