@@ -69,7 +69,7 @@ rules = Rules()
 
 rules['play'] = pL('play')
 
-rules['pause'] = pL('pause') | pL('stop')
+rules['pause'] = pG(pL('pause') | pL('stop'))
 
 rules['next'] = pS(pO('play'), pL('next'), pO(pL('song') | pL('track')))
 
