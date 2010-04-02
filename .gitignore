@@ -5,3 +5,4 @@ client/build
 *.out
 *.swp
 *~
+*.pyc

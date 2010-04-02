@@ -18,7 +18,10 @@ template = template.replace('{{ARTISTS}}', '|\n'.join(artists))
 template = template.replace('{{ALBUMS}}', ' |\n'.join(albums))
 template = template.replace('{{SONGS}}', ' |\n'.join(songs))
 
-jfsg.write(template)
+#jfsg.write(template)
+
+from language import rules
+jfsg.write('\n'.join(rules.to_jsgf()))
 
 jfsg.seek(0)
 
