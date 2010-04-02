@@ -134,7 +134,7 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 		finished = threading.Event()
 
 		def callback(text):
-
+			print "Got: "+text
 			result[0] = "\n".join(rules.parse(re.sub('\(\d+\)', '', text.lower())))
 			finished.set()
 

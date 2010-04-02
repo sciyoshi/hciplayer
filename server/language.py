@@ -7,6 +7,7 @@ pP = lambda str: pp.And([pL(x) for x in str.split()])
 pO = pp.Optional
 pG = pp.Group
 pI = pp.Suppress
+pOoM = pp.OneOrMore
 
 class Rules(dict):
 	def __setitem__(self, name, value):
@@ -63,7 +64,11 @@ class Rules(dict):
 
 artist_list = ['coldplay', 'tool', 'rage against the machine']
 album_list = ['a rush of blood to the head', 'lateralus', 'evil empire']
-title_list = ['clocks', 'green eyes', 'the grudge', 'bulls on parade']
+title_list = [
+	'politik', 'in my place', 'god put a smile upon your face', 'the scientist', 'clocks', 'daylight', 'green eyes', 'warning sign', 'a whisper', 'a rush of blood to the head', 'amsterdam',
+	'the grudge', 'eon blue apocalypse', 'the patient', 'mantra', 'schism', 'parabol', 'parabola', 'ticks and leeches', 'lateralus', 'disposition', 'reflection', 'triad', 'faaip de oiad',
+	'people of the sun', 'bulls on parade', 'vietnow', 'revolver', 'snakecharmer', 'tire me', 'down rodeo', 'without a face', 'wind below', 'roll right', 'year of tha boomerang'
+]
 
 rules = Rules()
 
@@ -93,25 +98,25 @@ rules['repeat'] = pO(pG(pP('set') | pP('turn') | pP('toggle'))) + pP('repeat') +
 artists = pG(pp.MatchFirst([pL(artist) for artist in artist_list])).setResultsName('artist')
 albums = pG(pp.MatchFirst([pL(album) for album in album_list])).setResultsName('album')
 titles = pG(pp.MatchFirst([pL(title) for title in title_list])).setResultsName('title')
-
+	
 #artists = pG(pP('coldplay') | pP('tool') | pP('rage against the machine')).setResultsName('artist')
 #albums = pG(pP('a rush of blood to the head') | pP('lateralus') | pL('evil empire')).setResultsName('album')
 #titles = pG(pL('clocks') | pL('green eyes') | pL('the grudge') | pL('bulls on parade')).setResultsName('title')
 
 filter = pO(pS(pO('all') +  pO(pG(pL('songs') | pL('tracks'))) )) + pO( pG(pP('by') | pP('from')) + pO(pP('artist')) + artists + pO( pG(pP('on') | pP('from')) + pP('album') + albums))
 
-select = (pO(pG(pP('song') | pP('track'))) + titles + pO(pP('by') + pO('artist') + artists)) + pO(pG(pP('on') | pP('from')) + pO(pP('album')) + albums) | \
+select = pG((pO(pG(pP('song') | pP('track'))) + titles + pO(pP('by') + pO('artist') + artists)) + pO(pG(pP('on') | pP('from')) + pO(pP('album')) + albums) | \
 		(pO(pP('artist') + artists) + pO(pP('album') + albums) + pG(pP('song') | pP('track')) + titles) | \
-		pP('album') + albums + pO(pG(pP('track') | pP('song')) + titles)
+		pP('album') + albums + pO(pG(pP('track') | pP('song')) + titles)).setResultsName('select')
 
 
 
-rules['playItems'] = pG(pP('put on') | pP('play') | pP('could you play')) + select
+rules['playItems'] = pG(pP('put on') | pP('play') | pP('could you play')) + select + pO(select + select + select + select)
 #rules['filterItems'] = pG(pP('put on') | pP('play') | pP('could you play')) + filter
 rules['queueItems'] = pG(pP('queue') | pP('play next')) + select
 
 def action(toks):
-	return ['playItems', ' '.join(toks.title), ' '.join(toks.album), ' '.join(toks.artist)]
+	return ['playItems', ' '.join(toks.select.title), ' '.join(toks.select.album), ' '.join(toks.select.artist)]
 rules['playItems'].setParseAction(action)
 
 def action(toks):
@@ -123,7 +128,7 @@ def action(toks):
 rules['repeat'].setParseAction(action)
 
 def action(toks):
-	return ['queueItems', ' '.join(toks.title), ' '.join(toks.album), ' '.join(toks.artist)]
+	return ['queueItems', ' '.join(toks.select.title), ' '.join(toks.select.album), ' '.join(toks.select.artist)]
 rules['queueItems'].setParseAction(action)
 
 
@@ -191,3 +196,4 @@ test('play album lateralus')
 test('queue album evil empire')
 test('turn shuffle on')
 test('shuffle toggle')
+test('song green eyes')
