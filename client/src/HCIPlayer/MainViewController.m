@@ -6,6 +6,7 @@
 #import <UIKit/UIView-UIViewGestures.h>
 #import <Celestial/Celestial.h>
 #import <AudioToolbox/AudioServices.h>
+#import "Commands.h"
 #import <time.h>
 
 
@@ -92,9 +93,9 @@ static NSString *_last_action;
 - (void) commandTap: (Command) command
 {
 	if ([self.player playbackState] == MPMusicPlaybackStatePlaying) {
-		[self commandPause];
+		[self commandPause:command];
 	} else {
-		[self commandPlay];
+		[self commandPlay:command];
 	}
 }
 
@@ -157,7 +158,7 @@ static NSString *_last_action;
 	}
 }
 
-- (void) commandHelp: (Command *) command
+- (void) commandHelp: (Command) command
 {
 	[self.feedback sayText:@"You can say things like, play, pause, repeat, \
 	 next song, play previous, re-play track, and toggle mute. To play or \
@@ -165,7 +166,7 @@ static NSString *_last_action;
 	 name or song title. For example, try saying 'Play song Bulls on Parade'."];
 }
 
-- (void) commandInfo
+- (void) commandInfo: (Command) command
 {
 	if ([self.player playbackState] == MPMusicPlaybackStatePlaying) {
 		[self.feedback sayText:[NSString stringWithFormat:@"Now playing %@ by %@",
@@ -179,13 +180,13 @@ static NSString *_last_action;
 	if (command.type == COMMAND_TAP) {
 		[self commandTap:command];
 	} else if (command.type == COMMAND_SWIPE_RIGHT) {
-		[self commandSwipeRight:command.gesture];
+		[self commandNext:command];
 	} else if (command.type == COMMAND_SWIPE_LEFT) {
-		[self commandSwipeLieft:command.gesture];
-	} else if (command.type == COMMAND_SWIPE_UP_DOWN) {
-		[self commandUpDown:command.gesture];
-	} else if (command.type == COMMAND_SwIPE_LEFT_RIGHT) {
-		[self commandSwipeLeftRight:command.gesture];
+		[self commandPrevious:command];
+	} else if (command.type == COMMAND_SWIPE_UPDOWN) {
+		[self commandUpDown:(ElasticScaleGestureRecognizer *) command.gesture];
+	} else if (command.type == COMMAND_SWIPE_LEFTRIGHT) {
+		[self commandLeftRight:(ElasticScaleGestureRecognizer *) command.gesture];
 	} else if (command.type == COMMAND_PLAY) {
 		[self commandPlay:command];
 	} else if (command.type == COMMAND_PAUSE) {
@@ -221,42 +222,42 @@ static NSString *_last_action;
 
 	NSArray *items = [text componentsSeparatedByString:@"\n"];
 
-	if ([items length] == 0) {
+	if ([items count] == 0) {
 		return command;
 	}
 
 	if ([[items objectAtIndex:0] isEqualToString:@"play"]) {
-		command.type = COMMAND_TYPE_PLAY;
+		command.type = COMMAND_PLAY;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"pause"]) {
-		command.type == COMMAND_TYPE_PAUSE;
+		command.type == COMMAND_PAUSE;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"next"]) {
-		command.type = COMMAND_TYPE_NEXT;
+		command.type = COMMAND_NEXT;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"previous"]) {
-		command.type = COMMAND_TYPE_PREVIOUS;
+		command.type = COMMAND_PREVIOUS;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"replay"]) {
-		command.type = COMMAND_TYPE_REPLAY;
+		command.type = COMMAND_REPLAY;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"info"]) {
-		command.type = COMMAND_TYPE_INFO;
+		command.type = COMMAND_INFO;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"help"]) {
-		command.type = COMMAND_TYPE_HELP;
+		command.type = COMMAND_HELP;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"exit"]) {
-		command.type = COMMAND_TYPE_EXIT;
+		command.type = COMMAND_EXIT;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"tutorial"]) {
-		command.type = COMMAND_TYPE_TUTORIAL;
+		command.type = COMMAND_TUTORIAL;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"shuffle"]) {
-		command.type = COMMAND_TYPE_SHUFFLE;
+		command.type = COMMAND_SHUFFLE;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"repeat"]) {
-		command.type = COMMAND_TYPE_REPEAT;
+		command.type = COMMAND_REPEAT;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"playItems"]) {
-		command.type = COMMAND_TYPE_PLAY_ITEMS;
+		command.type = COMMAND_PLAY_ITEMS;
 	} else if ([[items objectAtIndex:0] isEqualToString:@"queueItems"]) {
-		command.type = COMMAND_TYPE_QUEUE_ITEMS;
+		command.type = COMMAND_QUEUE_ITEMS;
 	}
 
-	if (command.type == COMMAND_TYPE_SHUFFLE || command.type == COMMAND_TYPE_REPEAT) {
+	if (command.type == COMMAND_SHUFFLE || command.type == COMMAND_REPEAT) {
 		command.arg = [[items objectAtIndex:1] isEqualToString:@"on"] ? COMMAND_ON :
 			[[items objectAtIndex:1] isEqualToString:@"off"] ? COMMAND_OFF : COMMAND_TOGGLE;
-	} else if (command.type == COMMAND_TYPE_PLAY_ITEMS || command.type == COMMAND_TYPE_QUEUE_ITEMS) {
+	} else if (command.type == COMMAND_PLAY_ITEMS || command.type == COMMAND_QUEUE_ITEMS) {
 		command.title = [items objectAtIndex:1];
 		command.album = [items objectAtIndex:2];
 		command.artist = [items objectAtIndex:3];
@@ -339,7 +340,7 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 
 - (void) handleTap: (UIGestureRecognizer *) gesture
 {
-	Command c = { .type = COMMAND_HANDLE_TAP, .gesture = gesture };
+	Command c = { .type = COMMAND_TAP, .gesture = gesture };
 	[self handleCommand:c];
 }
 

@@ -2,6 +2,15 @@
 
 #import <math.h>
 
+NSArray *NSArrayFromValueArray(CGPoint *points, int length)
+{
+	NSMutableArray *array = [NSMutableArray arrayWithCapacity:length];
+	for (int i = 0; i < length; i++)
+		[array addObject:[NSValue valueWithCGPoint:points[i]]];
+	return array;
+}
+
+
 @implementation SimplePathGestureRecognizer
 
 - (void) touchesBegan: (NSSet *) touches withEvent: (UIEvent *) event
@@ -272,13 +281,6 @@
 
 @end
 
-NSArray *NSArrayFromValueArray(CGPoint *points, int length)
-{
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:length];
-	for (int i = 0; i < length; i++)
-		[array addObject:[NSValue valueWithCGPoint:points[i]]];
-	return array;
-}
 
 
 

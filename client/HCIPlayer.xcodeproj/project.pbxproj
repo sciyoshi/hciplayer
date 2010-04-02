@@ -35,8 +35,6 @@
 		3B36DB3F115E4AD70082B361 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B36DB3E115E4AD70082B361 /* QuartzCore.framework */; };
 		3B36DB43115E4AE80082B361 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B36DB42115E4AE80082B361 /* CFNetwork.framework */; };
 		3B4904DA11635091002EAC6C /* AudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B4904D911635091002EAC6C /* AudioController.m */; };
-		3B56EA701165A61000EDBC51 /* MainView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3B56EA6F1165A61000EDBC51 /* MainView.xib */; };
-		3B56EAAD1165AE1800EDBC51 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3B56EAAC1165AE1800EDBC51 /* MainViewController.xib */; };
 		3B72D9431164FFF400EC81C5 /* Celestial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B72D9421164FFF400EC81C5 /* Celestial.framework */; };
 		3B72DAF911651CE900EC81C5 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B72DAF811651CE900EC81C5 /* CoreTelephony.framework */; };
 		3BAC9E5A115B1D84007B37DD /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BAC9E59115B1D84007B37DD /* MediaPlayer.framework */; };
@@ -45,6 +43,7 @@
 		3BB93CDF1165F1DE00956E4E /* DTResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BB93CD91165F1DE00956E4E /* DTResult.m */; };
 		3BB93CE01165F1DE00956E4E /* DTTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BB93CDB1165F1DE00956E4E /* DTTemplate.m */; };
 		3BB93CE11165F1DE00956E4E /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 3BB93CDC1165F1DE00956E4E /* LICENSE */; };
+		3BF236AF11662F1C007C8662 /* Tutorial.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BF236AE11662F1C007C8662 /* Tutorial.m */; };
 		3BF73ED5116397DF00DE2BC5 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BF73ED4116397DF00DE2BC5 /* Reachability.m */; };
 		3BF73EF7116397DF00DE2BC5 /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 3BF73EF2116397DF00DE2BC5 /* Images */; };
 		3BF73EFA116397DF00DE2BC5 /* Speech in Resources */ = {isa = PBXBuildFile; fileRef = 3BF73EF8116397DF00DE2BC5 /* Speech */; };
@@ -97,8 +96,6 @@
 		3B36DB42115E4AE80082B361 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		3B4904D811635091002EAC6C /* AudioController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioController.h; sourceTree = "<group>"; };
 		3B4904D911635091002EAC6C /* AudioController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioController.m; sourceTree = "<group>"; };
-		3B56EA6F1165A61000EDBC51 /* MainView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainView.xib; sourceTree = "<group>"; };
-		3B56EAAC1165AE1800EDBC51 /* MainViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
 		3B72D9421164FFF400EC81C5 /* Celestial.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Celestial.framework; path = System/Library/PrivateFrameworks/Celestial.framework; sourceTree = SDKROOT; };
 		3B72DAF811651CE900EC81C5 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/PrivateFrameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		3BAC9E59115B1D84007B37DD /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -111,6 +108,9 @@
 		3BB93CDA1165F1DE00956E4E /* DTTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTTemplate.h; sourceTree = "<group>"; };
 		3BB93CDB1165F1DE00956E4E /* DTTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DTTemplate.m; sourceTree = "<group>"; };
 		3BB93CDC1165F1DE00956E4E /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		3BF236AD11662F1C007C8662 /* Tutorial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tutorial.h; sourceTree = "<group>"; };
+		3BF236AE11662F1C007C8662 /* Tutorial.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tutorial.m; sourceTree = "<group>"; };
+		3BF236BE11662F1C007C8662 /* Commands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Commands.h; sourceTree = "<group>"; };
 		3BF73ED3116397DF00DE2BC5 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		3BF73ED4116397DF00DE2BC5 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		3BF73EF2116397DF00DE2BC5 /* Images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Images; path = Resources/Images; sourceTree = "<group>"; };
@@ -159,8 +159,6 @@
 				3B1FEEC611629995000BE79F /* src */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				3B56EA6F1165A61000EDBC51 /* MainView.xib */,
-				3B56EAAC1165AE1800EDBC51 /* MainViewController.xib */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -221,6 +219,9 @@
 		3B1FEEE111629AB3000BE79F /* HCIPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				3BF236BE11662F1C007C8662 /* Commands.h */,
+				3BF236AD11662F1C007C8662 /* Tutorial.h */,
+				3BF236AE11662F1C007C8662 /* Tutorial.m */,
 				3B1FEEE211629AB3000BE79F /* AudioFeedback.h */,
 				3B1FEEE311629AB3000BE79F /* AudioFeedback.m */,
 				3B1FEEE411629AB3000BE79F /* AudioStreamer.h */,
@@ -327,8 +328,6 @@
 				3BF73EF7116397DF00DE2BC5 /* Images in Resources */,
 				3BF73EFA116397DF00DE2BC5 /* Speech in Resources */,
 				3BFDDA241163FDC100BFF4D0 /* Settings.bundle in Resources */,
-				3B56EA701165A61000EDBC51 /* MainView.xib in Resources */,
-				3B56EAAD1165AE1800EDBC51 /* MainViewController.xib in Resources */,
 				3BB93CE11165F1DE00956E4E /* LICENSE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -389,6 +388,7 @@
 				3BB93CDE1165F1DE00956E4E /* DTRecognizer.m in Sources */,
 				3BB93CDF1165F1DE00956E4E /* DTResult.m in Sources */,
 				3BB93CE01165F1DE00956E4E /* DTTemplate.m in Sources */,
+				3BF236AF11662F1C007C8662 /* Tutorial.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

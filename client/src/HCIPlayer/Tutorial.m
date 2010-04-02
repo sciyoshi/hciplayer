@@ -6,20 +6,21 @@
 #import "Commands.h"
 
 #import <Celestial/Celestial.h>
-#import <Tutorial.h>
+#import "Tutorial.h"
 #import <time.h>
 
-#define SAY(str) [self.feedback SayText:@str]
+#define SAY(str) [self.feedback sayText:@str]
 
 @implementation Tutorial
-tutorial_cmd_t cmd;
-AudioFeedback *feedback;
 
--(id)init: (AudioFeedback*)feedback
+@synthesize cmd;
+@synthesize feedback;
+
+-(id)init: (AudioFeedback*)my_feedback
 {
 	if (self = [super init])
 	{
-		self.feedback = feedback;
+		self.feedback = my_feedback;
 		self.cmd = TUT_OFF;
 	}
 	return self;
@@ -67,7 +68,7 @@ AudioFeedback *feedback;
 			SAY("Now exiting the tutorial");
 			break;
 		case TUT_INTRO:
-			SAY("Hello, and welcome to the HCIplayer portable music player tutorial. At any time you can exit this tutorial with the voice command 'exit'.")
+			SAY("Hello, and welcome to the HCIplayer portable music player tutorial. At any time you can exit this tutorial with the voice command 'exit'.");
 			SAY("We will now walk you through some of the basic operations of the player:");
 		case TUT_TAP_ONCE:
 			SAY("Tap the screen once to begin playback");
