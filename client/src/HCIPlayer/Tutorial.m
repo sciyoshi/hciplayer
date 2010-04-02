@@ -3,6 +3,7 @@
 #import "HCIPlayerAppDelegate.h"
 #import "VoiceRecognizer.h"
 #import "Gestures.h"
+#import "Commands.h"
 
 #import <Celestial/Celestial.h>
 #import <Tutorial.h>

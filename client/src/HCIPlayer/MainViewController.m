@@ -82,32 +82,6 @@ static NSString *_last_action;
 	[self setImageForPlaybackState];
 }
 
-typedef enum {
-	COMMAND_NONE,
-	COMMAND_HELP,
-	COMMAND_INFO,
-	COMMAND_PLAY,
-	COMMAND_PAUSE,
-	COMMAND_NEXT,
-	COMMAND_PREVIOUS,
-	COMMAND_REPLAY,
-	COMMAND_SHUFFLE,
-	COMMAND_SHUFFLE_ON,
-	COMMAND_SHUFFLE_OFF,
-	COMMAND_REPEAT,
-	COMMAND_REPEAT_ON,
-	COMMAND_REPEAT_OFF,
-	COMMAND_LIST_PLAY,
-	COMMAND_LIST_QUEUE,
-} CommandType;
-
-typedef struct {
-	CommandType type;
-	NSString *artist;
-	NSString *album;
-	NSString *title;
-} Command;
-
 - (void) commandHelp
 {
 	[self.feedback sayText:@"You can say things like, play, pause, repeat, \
@@ -134,68 +108,51 @@ typedef struct {
 	}
 }
 
-#define MATCH(tp, str) if ([text isEqualToString:str]) { command.type = tp; return command; } 
-#define MATCHP(tp, str) if ([text hasPrefix:str]) { command.type = tp; return command; }
-
 - (Command) parseVoiceCommand: (NSString *) text
 {
 	Command command = { .type = COMMAND_NONE };
 
-	MATCH(COMMAND_HELP, @"list available commands");
-	MATCH(COMMAND_HELP, @"available commands");
-	MATCH(COMMAND_HELP, @"what can i say");
-	MATCHP(COMMAND_HELP, @"help");
+	NSArray *items = [text componentsSeparatedByString:@"\n"];
 
-	MATCH(COMMAND_INFO, @"what's playing");
-	MATCH(COMMAND_INFO, @"what is playing");
-	MATCH(COMMAND_INFO, @"now playing");
-	MATCH(COMMAND_INFO, @"info");
+	if ([items length] == 0) {
+		return command;
+	}
 
-	MATCH(COMMAND_PLAY, @"play");
-	MATCH(COMMAND_PAUSE, @"pause");
-	MATCH(COMMAND_PAUSE, @"stop");
+	if ([[items objectAtIndex:0] isEqualToString:@"play"]) {
+		command.type = COMMAND_TYPE_PLAY;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"pause"]) {
+		command.type == COMMAND_TYPE_PAUSE;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"next"]) {
+		command.type = COMMAND_TYPE_NEXT;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"previous"]) {
+		command.type = COMMAND_TYPE_PREVIOUS;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"replay"]) {
+		command.type = COMMAND_TYPE_REPLAY;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"info"]) {
+		command.type = COMMAND_TYPE_INFO;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"help"]) {
+		command.type = COMMAND_TYPE_HELP;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"exit"]) {
+		command.type = COMMAND_TYPE_EXIT;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"tutorial"]) {
+		command.type = COMMAND_TYPE_TUTORIAL;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"shuffle"]) {
+		command.type = COMMAND_TYPE_SHUFFLE;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"repeat"]) {
+		command.type = COMMAND_TYPE_REPEAT;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"playItems"]) {
+		command.type = COMMAND_TYPE_PLAY_ITEMS;
+	} else if ([[items objectAtIndex:0] isEqualToString:@"queueItems"]) {
+		command.type = COMMAND_TYPE_QUEUE_ITEMS;
+	}
 
-	MATCHP(COMMAND_NEXT, @"next");
-	MATCHP(COMMAND_NEXT, @"play next");
-
-	MATCHP(COMMAND_PREVIOUS, @"previous");
-	MATCHP(COMMAND_PREVIOUS, @"play previous");
-
-	MATCHP(COMMAND_REPLAY, @"replay");
-	
-	MATCH(COMMAND_SHUFFLE, @"shuffle");
-	MATCH(COMMAND_SHUFFLE, @"toggle shuffle");
-
-	MATCH(COMMAND_SHUFFLE_ON, @"shuffle on");
-	MATCH(COMMAND_SHUFFLE_ON, @"turn shuffle on");
-
-	MATCH(COMMAND_SHUFFLE_OFF, @"shuffle off");
-	MATCH(COMMAND_SHUFFLE_OFF, @"turn shuffle off");
-
-	MATCH(COMMAND_REPEAT, @"repeat");
-	MATCH(COMMAND_REPEAT, @"toggle repeat");
-	
-	MATCH(COMMAND_REPEAT_ON, @"repeat on");
-	MATCH(COMMAND_REPEAT_ON, @"turn repeat on");
-
-	MATCH(COMMAND_REPEAT_OFF, @"repeat off");
-	MATCH(COMMAND_REPEAT_OFF, @"turn repeat off");
-
-	if ([text hasPrefix:@"play"] || [text hasPrefix:@"queue"]) {
-		NSArray *components = [text componentsSeparatedByString:@" "];
-
-		if ([text hasPrefix:@"play"])
-			command.type = COMMAND_LIST_PLAY;
-		else
-			command.type = COMMAND_LIST_QUEUE;
-		
-		NSString *first = [components objectAtIndex:1];
-		
-		if ([first isEqualToString:@"all"]) {
-			
-		} else if ([first isEqualToString:@"artist"]) {
-			
-		}
+	if (command.type == COMMAND_TYPE_SHUFFLE || command.type == COMMAND_TYPE_REPEAT) {
+		command.arg = [[items objectAtIndex:1] isEqualToString:@"on"] ? COMMAND_ON :
+			[[items objectAtIndex:1] isEqualToString:@"off"] ? COMMAND_OFF : COMMAND_TOGGLE;
+	} else if (command.type == COMMAND_TYPE_PLAY_ITEMS || command.type == COMMAND_TYPE_QUEUE_ITEMS) {
+		command.title = [items objectAtIndex:1];
+		command.album = [items objectAtIndex:2];
+		command.artist = [items objectAtIndex:3];
 	}
 
 	return command;
