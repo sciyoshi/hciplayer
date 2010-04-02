@@ -424,7 +424,10 @@ int vibratecallback(void *connection, CFStringRef string, CFDictionaryRef dictio
 
 - (void) handleDT: (DollarTouchGestureRecognizer *) gesture
 {
-	self.label.text = [gesture result];
+	if ([(NSString *)gesture.result.name isEqualToString:@"circle"]){
+		
+		self.label.text = "Shuffle";
+	}
 	
 }
 
