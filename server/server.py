@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import os
 import re
 import sys
@@ -17,6 +16,8 @@ gobject.threads_init()
 
 from SocketServer import ThreadingMixIn, TCPServer, BaseRequestHandler
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+
+from language import rules
 
 class Recognizer(object):
 	DICT_FOLDER = os.path.join(os.path.dirname(__file__), 'dict')
@@ -133,7 +134,8 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 		finished = threading.Event()
 
 		def callback(text):
-			result[0] = re.sub('\(\d+\)', '', text.lower())
+
+			result[0] = "\n".join(rules.parse(re.sub('\(\d+\)', '', text.lower())))
 			finished.set()
 
 		if not self.server.recognizer.recognize(stream.name, callback):
