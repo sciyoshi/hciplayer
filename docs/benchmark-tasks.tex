@@ -31,10 +31,30 @@ This goal attempts to quantify how well voice commands are recognized, and is me
 \end{description}
 
 \section{Benchmark Tasks}
-These tasks are analog to those asked of the user in the evaluation manual. There is no benchmark for the tutorial as it is a simple excercise focused on ensuring that the user has successfully performed every type of command in the system. While it is imperitive that it be completed it is not necessary that any results be derived from it.
+These tasks are analog to those asked of the user in the evaluation manual.
+ \\ \\ ----BEGIN TUTORIAL---- \\
 \begin{enumerate}
-\setcounter{enumi}{1} % Skip the first one (tutorial)
-\item Play a song using gestures.
+\item Tap to play start playback. 
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 8s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Adjust volume using gestures
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
+\hline
+\textbf{(GR)} & Number of gestures attempted & 2 \\
+\hline
+\end{tabular}\end{center}
+
+\item Pause music using gestures.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
@@ -44,85 +64,137 @@ These tasks are analog to those asked of the user in the evaluation manual. Ther
 \hline
 \end{tabular}\end{center}
 
-\item Pause a song using gestures.
+\item Play using a voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 2 \\
+\hline
+\end{tabular}\end{center}
+
+\item Skip track by gesture.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
 \textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
 \hline
-\textbf{(GR)} & Number of gestures attempted & 1 \\
+\textbf{(GR)} & Number of gestures attempted & 2 \\
 \hline
 \end{tabular}\end{center}
 
-\item Play next song using gestures.
+\item Go to previous track by gesture
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
-\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
-\hline
-\textbf{(GR)} & Number of gestures attempted & 1 \\
-\hline
-\end{tabular}\end{center}
-
-\item Play previous song using gestures.
-\begin{center}\begin{tabular}{l|l|c}
-\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
-\hline
-\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
+\textbf{(EU)} & Time taken to complete (in seconds) & 3s \\
 \hline
 \textbf{(GR)} & Number of gestures attempted & 1 \\
 \hline
 \end{tabular}\end{center}
 
-\item Reduce volume using gestures.
+\item Play artist by voice command.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
-\textbf{(EU)} & Time taken to complete (in seconds) & 7s \\
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
 \hline
-\textbf{(GR)} & Number of gestures attempted & 1 \\
+\textbf{(VR)} & Number of voice commands attempted & 2 \\
 \hline
 \end{tabular}\end{center}
 
-\item Play all songs by an artist using a voice command.
+\item Play song by voice command.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
-\textbf{(EU)} & Time taken to complete (in seconds) & 13s \\
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
 \hline
 \textbf{(VR)} & Number of voice commands attempted & 1 \\
 \hline
 \end{tabular}\end{center}
 
-\item Play specific song using a voice command.
+\item Queue song by voice command.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
-\textbf{(EU)} & Time taken to complete (in seconds) & 13s \\
+\textbf{(EU)} & Time taken to complete (in seconds) & 8s \\
 \hline
 \textbf{(VR)} & Number of voice commands attempted & 1 \\
 \hline
 \end{tabular}\end{center}
 
-\item Mute playback using gestures.
+\item Skip song by voice command.
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
 \textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
 \hline
-\textbf{(GR)} & Number of gestures attempted & 1 \\
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
 \hline
 \end{tabular}\end{center}
 
-\item Unmute playback using gestures.
+\item Seek in song by gesture
 \begin{center}\begin{tabular}{l|l|c}
 \textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
 \hline
-\textbf{(EU)} & Time taken to complete (in seconds) & 5s \\
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
 \hline
-\textbf{(GR)} & Number of gestures attempted & 1 \\
+\textbf{(GR)} & Number of gestures attempted & 3 \\
 \hline
 \end{tabular}\end{center}
+
+\item Replay by voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Turn shuffle on by voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Turn shuffle off by voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Turn repeat on by voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+\item Turn repeat off by voice command.
+\begin{center}\begin{tabular}{l|l|c}
+\textbf{Goal} & \textbf{Measure} & \textbf{Expected} \\
+\hline
+\textbf{(EU)} & Time taken to complete (in seconds) & 10s \\
+\hline
+\textbf{(VR)} & Number of voice commands attempted & 1 \\
+\hline
+\end{tabular}\end{center}
+
+ \\ \\---- END TUTORIAL ----\\ \\
 
 \item Play all songs by a specific artist.
 \begin{center}\begin{tabular}{l|l|c}
