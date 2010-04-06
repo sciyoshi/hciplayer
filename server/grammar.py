@@ -7,16 +7,18 @@ import urlparse
 import tempfile
 import subprocess
 
-jfsg = tempfile.TemporaryFile()
+jsgf = tempfile.TemporaryFile()
 
 from language import rules
-jfsg.write('\n'.join(rules.to_jsgf()))
+jsgf.write('\n'.join(rules.to_jsgf()))
 
-jfsg.seek(0)
+jsgf.seek(0)
 
 fsg = open('dict/grammar.fsg', 'w+')
 
-subprocess.Popen(['sphinx_jsgf2fsg'], stdin=jfsg, stdout=fsg, stderr=subprocess.PIPE).wait()
+subprocess.Popen(['sphinx_jsgf2fsg'], stdin=jsgf, stdout=fsg, stderr=subprocess.PIPE).wait()
+
+jsgf.close()
 
 fsg.seek(0)
 
@@ -26,6 +28,8 @@ for line in fsg:
 		word = line.split(' ', 4)[4:]
 		if word:
 			words.add(word[0].strip())
+
+fsg.close()
 
 print ', '.join(words)
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.6
+
 import os
 import re
 import sys
@@ -14,7 +15,7 @@ import gst
 
 gobject.threads_init()
 
-from SocketServer import ThreadingMixIn, TCPServer, BaseRequestHandler
+from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
 from language import rules
@@ -48,7 +49,7 @@ class Recognizer(object):
 
 		self.sphinx.props.dict = self.get_file_name('.dic')
 		self.sphinx.props.fsg = self.get_file_name('.fsg')
-#		self.sphinx.props.bestpath = True
+		# self.sphinx.props.bestpath = True
 		self.sphinx.props.maxhmmpf = 2000
 		self.sphinx.props.configured = True
 
@@ -78,12 +79,10 @@ class Recognizer(object):
 			pad.link(sink)
 
 	def on_sphinx_partial_result(self, sphinx, text, uttid, score=None):
-#		print "Partial %s -- %s" % (text, score)
 		pass
 
 	def on_sphinx_result(self, sphinx, text, uttid, score=None):
 		msg = gst.Structure('sphinx_result')
-#		print "Score: ", score
 		msg['text'] = text
 
 		self.bus.post(gst.message_new_application(sphinx, msg))
@@ -140,7 +139,7 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 		def callback(text):
 			print "Got: "+text
 			try:
-				result[0] = json.dumps(rules.parse(re.sub('\(\d+\)', '', text.lower()))[0])
+				result[0] = json.dumps(rules.parse(re.sub('\(\d+\)', '', text.lower())))
 			except:
 				pass
 			finished.set()
@@ -149,6 +148,7 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 			self.send_response(500)
 			self.end_headers()
 			return
+
 		finished.wait()
 
 		self.send_response(200)
@@ -156,34 +156,11 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 		self.send_header('Content-type', 'text/plain')
 		self.end_headers()
 		self.wfile.write(result[0])
+
 		print '  --> RESULT: "%s"' % result[0]
 
-	def send_response(self, code, message=None):
-		"""Send the response header and log the response code.
-
-		Also send two standard headers with the server software
-		version and the current date.
-
-		"""
-
-		if message is None:
-			if code in self.responses:
-
-				message = self.responses[code][0]
-			else:
-				message = ''
-	
-		if self.request_version != 'HTTP/0.9':
-
-			self.wfile.write("%s %d %s\r\n" %
-					 (self.protocol_version, code, message))
-			# print (self.protocol_version, code, message)
-
-		self.send_header('Server', self.version_string())
-
-		self.send_header('Date', self.date_time_string())
-
-
+	def log_message(self, *args, **kwargs):
+		pass
 
 class HCIPlayerServer(HTTPServer, object):
 	allow_reuse_address = True

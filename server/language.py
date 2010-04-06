@@ -11,25 +11,66 @@ pG = pp.Group
 pI = pp.Suppress
 pOoM = pp.OneOrMore
 
-class Rules(dict):
+class Rules(object):
+	def __init__(self):
+		self.rules = {}
+
+		ruleName = pp.Combine(pp.Suppress('<') + pp.Word(pp.alphanums) + pp.Suppress('>'))
+		ruleName.setParseAction(lambda toks: self[toks[0]])
+
+		expr = pp.Forward()
+
+		seq = pp.Group(pp.delimitedList(expr, delim=pp.Empty()))
+		seq.setParseAction(lambda toks: pp.And(toks[0]))
+
+		self.rule = alt = pp.Group(pp.delimitedList(seq, delim='|'))
+		alt.setParseAction(lambda toks: pp.Or(toks[0]))
+
+		optExpr = pp.nestedExpr(opener='[', closer=']', content=alt)
+		optExpr.setParseAction(lambda toks: pp.Optional(toks[0][0]))
+
+		groupExpr = pp.nestedExpr(opener='(', closer=')', content=alt)
+		groupExpr.setParseAction(lambda toks: pp.Group(toks[0][0]))
+
+		word = pp.Word(pp.alphanums + r"'\"")
+		word.setParseAction(lambda toks: pp.Suppress(pp.Keyword(toks[0])))
+
+		expr << pp.Or([ruleName, optExpr, groupExpr, word])
+
 	def __setitem__(self, name, value):
-		if name in self:
-			self[name] << value
-		else:
+		manual = False
+
+		if isinstance(name, tuple):
+			name, manual = name
+		elif not isinstance(value, (str, unicode)):
+			manual = True
+
+		if isinstance(value, (str, unicode)):
+			value = self.rule.parseString(value)[0].setResultsName(name)
+
+		if not manual:
 			value = value.setResultsName(name)
 			value.setParseAction(lambda: {'type': name})
-			super(Rules, self).__setitem__(name, value)
+
+		if name in self.rules:
+			self.rules[name] << value
+		else:
+			self.rules[name] = value
 
 	def __getitem__(self, name):
-		if name in self:
-			return super(Rules, self).__getitem__(name)
+		if name in self.rules:
+			return self.rules[name]
 		else:
-			self[name] = value = pp.Forward()
-			return value
+			self.rules[name] = pp.Forward().setResultsName(name)
+			self.rules[name].setParseAction(lambda: {'type': name})
+			return self.rules[name]
+
+	def __delitem__(self, name):
+		del self.rules[name]
 
 	@property
 	def commands(self):
-		return pp.Or(self.values()).setResultsName('command')
+		return pp.Or(self.rules.values()).setResultsName('command')
 
 	def parse(self, str):
 		try:
@@ -38,9 +79,9 @@ class Rules(dict):
 			return {}
 
 	def transform(self, item, top=False):
-		if item in self.values() and not top:
+		if item in self.rules.values() and not top:
 			return '<%s>' % item.resultsName
-		elif isinstance(item, pp.Literal):
+		elif isinstance(item, (pp.Literal, pp.Keyword)):
 			return unicode(item.match).upper()
 		elif isinstance(item, pp.And):
 			return ' '.join(self.transform(x) for x in item.exprs)
@@ -48,7 +89,7 @@ class Rules(dict):
 			return '[ %s ]' % self.transform(item.expr)
 		elif isinstance(item, pp.Group):
 			return '( %s )' % self.transform(item.expr)
-		elif isinstance(item, pp.Suppress):
+		elif isinstance(item, (pp.Suppress, pp.Forward)):
 			return self.transform(item.expr)
 		elif isinstance(item, (pp.MatchFirst, pp.Or)):
 			return ' | '.join(self.transform(x) for x in item.exprs)
@@ -58,10 +99,9 @@ class Rules(dict):
 		yield '#JSGF V1.0;'
 		yield 'grammar hciplayer;'
 		yield 'public <commands> = %s;' % self.transform(self.commands, True)
-		for name, rule in self.items():
+		for name, rule in self.rules.items():
 			yield '%s = %s;' % (self.transform(rule), self.transform(rule, True))
 
-			
 
 artist_list = ['coldplay', 'tool', 'rage against the machine']
 album_list = ['a rush of blood to the head', 'lateralus', 'evil empire']
@@ -73,123 +113,90 @@ title_list = [
 
 rules = Rules()
 
-rules['play'] = pL('play')
+rules['play'] = 'play'
 
-rules['pause'] = pG(pL('pause') | pL('stop'))
+rules['pause'] = 'pause | stop'
 
-rules['next'] = pS(pO('play'), pL('next'), pO(pL('song') | pL('track')))
+rules['next'] = '[ play ] next [ song | track ]'
 
-rules['previous'] = pS(pO('play'), pL('previous'), pO(pL('song') | pL('track')))
+rules['previous'] = '[ play ] previous [ song | track ]'
 
-rules['replay'] = pL('replay') + pO(pL('song') | pL('track'))
+rules['replay'] = 'replay [ song | track ]'
 
-rules['info'] = pP('what\'s playing') | pP('what is playing') | pP('now playing') | pP('info')
+rules['info'] = r"what's playing | what is playing | now playing | info"
 
-rules['help'] = pP('list available commands') | pP('help me') | pP('what can i say')
+rules['help'] = 'list available commands | help me | what can i say'
 
-rules['exit'] = pP('exit')
+rules['exit'] = 'exit'
 
-rules['tutorial'] = pP('tutorial')
+rules['tutorial'] = 'tutorial'
 
-values = pG(pP('on') | pP('off') | pI(pP('toggle'))).setResultsName('value')
+rules['value'] = pG(pP('on') | pP('off') | pI(pP('toggle'))).setResultsName('value')
 
-rules['shuffle'] = pO(pG(pP('set') | pP('turn') | pP('toggle'))) + pP('shuffle') + pO(values)
-rules['repeat'] = pO(pG(pP('set') | pP('turn') | pP('toggle'))) + pP('repeat') + pO(values)
-rules['listItems'] = pP('list') + pO(pP('selected'))+ pO(pG(pP('items') | pP('tracks') | pP('songs')))
+rules['shuffle'] = '[ set | turn | toggle ] shuffle [ <value> ]'
+rules['shuffle'].setParseAction(lambda toks: {'type': 'shuffle', 'args': toks.value[0] if toks.value else ''})
 
-artists = pG(pp.MatchFirst([pL(artist) for artist in artist_list])).setResultsName('artist')
-albums = pG(pp.MatchFirst([pL(album) for album in album_list])).setResultsName('album')
-titles = pG(pp.MatchFirst([pL(title) for title in title_list])).setResultsName('title')
-	
-#artists = pG(pP('coldplay') | pP('tool') | pP('rage against the machine')).setResultsName('artist')
-#albums = pG(pP('a rush of blood to the head') | pP('lateralus') | pL('evil empire')).setResultsName('album')
-#titles = pG(pL('clocks') | pL('green eyes') | pL('the grudge') | pL('bulls on parade')).setResultsName('title')
+rules['repeat'] = '[ set | turn | toggle ] repeat <value>'
+rules['repeat'].setParseAction(lambda toks: {'type': 'repeat', 'args': toks.value[0] if toks.value else ''})
 
+del rules['value']
 
+rules['artists'] = pG(pp.MatchFirst([pL(artist) for artist in artist_list])).setResultsName('artists')
+rules['albums'] = pG(pp.MatchFirst([pL(album) for album in album_list])).setResultsName('albums')
+rules['titles'] = pG(pp.MatchFirst([pL(title) for title in title_list])).setResultsName('titles')
 
-filter = pO( \
-		pS(pO('all') +  pO(pG(pL('songs') | pL('tracks'))) ) \
-	) + \
-	pO( \
-		pG(pP('by') | pP('from')) + \
-		pO(pP('artist')) + \
-		artists + \
-		pO( \
-			pG(pP('on') | pP('from')) + \
-			pP('album') + albums
-		) \
-	)
+rules['selectors', True] = (pG(pO(pP('selected') | pP('all'))) + pO(pP('songs') | pP('tracks') | pP('items'))).setResultsName('selectors')
 
-select = pG( \
-		pS( \
-			pO( \
-				pG(pP('song') | pP('track')) \
-			) + \
-			titles + \
-			pO( \
-				pP('by') + \
-				pO('artist') + \
-				artists \
-			) + \
-			pO( \
-				pG(pP('on') | pP('from')) + \
-				pO(pP('album')) + \
-				albums \
-			) \
-		) | \
-		pS( \
-			pP('artist') + \
-			artists +\
-			pO( \
-				pP('album') + \
-				albums \
-			) + \
-			pO( \
-				pG(pP('song') | pP('track')) + \
-				titles \
-			) \
-		) | \
-		pS( \
-			pP('album') + \
-			albums + \
-			pO( \
-				pG(pP('track') | pP('song')) + \
-				titles
-			) \
-		) \
-	).setResultsName('select')
+rules['selectors'].setParseAction(lambda toks: [toks[0] if toks[0] else ''])
 
+rules['filters', True] = """(
+	[ song | track ] <titles>
+	[ by [ artist ] <artists> ]
+	[ on [ album ] <albums> ]
+) | (
+	artist <artists>
+	[ album <albums> ] 
+	[ [ song | track ] <albums> ]
+) | (
+	album <albums>
+	[ [ song | track ] <albums> ]
+)"""
 
+rules['filters'].setParseAction(lambda toks: [{
+	'title': toks.filters.titles[0] if toks.filters.titles else '',
+	'albumTitle': toks.filters.albums[0] if toks.filters.albums else '',
+	'artist': toks.filters.artists[0] if toks.filters.artists else ''
+}] if toks else [()])
 
-rules['playItems'] = pS(pG(pP('put on') | pP('play') | pP('could you play')) + select)# + pO(pP('and') + select) + pO(pP('and') + select) + pO(pP('and') + select))
-rules['selectItems'] = pG(pP('select') | pP('filter')) + select
-rules['queueItems'] = pG(pP('queue') | pP('play next')) + select
+rules['playItems'] = '( put on | play | could you play ) ( <selectors> | <filters> )'
+rules['playItems'].setParseAction(lambda toks: {
+	'type': 'playItems',
+	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
+})
 
-def val(a):
-	try:
-		return str(a[0])
-	except:
-		return ''
+rules['queueItems'] = '( queue | play next ) ( <selectors> | <filters> )'
+rules['queueItems'].setParseAction(lambda toks: {
+	'type': 'queueItems',
+	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
+})
 
-def action(toks):
-	return {'type':'playItems', 'args': [{'title': val(toks.select.title), 'albumTitle':val(toks.select.album), 'artist':val(toks.select.artist)},]}
-rules['playItems'].setParseAction(action)
+rules['selectItems'] = '( select | filter ) ( <selectors> | <filters> )'
+rules['selectItems'].setParseAction(lambda toks: {
+	'type': 'selectItems',
+	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
+})
 
-def action(toks):
-	return {'type':'shuffle', 'args': val(toks.value)}
-rules['shuffle'].setParseAction(action)
+rules['listItems'] = '( list ) ( <selectors> | <filters> )'
+rules['listItems'].setParseAction(lambda toks: {
+	'type': 'listItems',
+	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
+})
 
-def action(toks):
-	return {'type':'repeat', 'args': val(toks.value)}
-rules['repeat'].setParseAction(action)
-
-def action(toks):
-	return {'type':'queueItems', 'args': [{'title': val(toks.select.title), 'albumTitle':val(toks.select.album), 'artist':val(toks.select.artist)},]}
-rules['queueItems'].setParseAction(action)
-
-def action(toks):
-	return {'type':'selectItems', 'args': [{'title': val(toks.select.title), 'albumTitle':val(toks.select.album), 'artist':val(toks.select.artist)},]}
-rules['selectItems'].setParseAction(action)
+del rules['artists']
+del rules['albums']
+del rules['titles']
+del rules['selectors']
+del rules['filters']
 
 if __name__ == '__main__':
 	print
@@ -209,9 +216,11 @@ if __name__ == '__main__':
 	test('what can i say')
 	test('next')
 	test('play artist coldplay')
+	test('play selected songs')
 	test('play album lateralus')
 	test('queue album evil empire')
 	test('turn shuffle on')
 	test('shuffle toggle')
 	test('queue song green eyes')
+	test('list')
 
