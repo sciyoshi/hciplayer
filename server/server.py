@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.6
 import os
 import re
 import sys
@@ -48,6 +48,7 @@ class Recognizer(object):
 
 		self.sphinx.props.dict = self.get_file_name('.dic')
 		self.sphinx.props.fsg = self.get_file_name('.fsg')
+#		self.sphinx.props.bestpath = True
 		self.sphinx.props.maxhmmpf = 2000
 		self.sphinx.props.configured = True
 
@@ -76,11 +77,13 @@ class Recognizer(object):
 		if not pad.is_linked() and not sink.is_linked() and pad.can_link(sink):
 			pad.link(sink)
 
-	def on_sphinx_partial_result(self, sphinx, text, uttid):
+	def on_sphinx_partial_result(self, sphinx, text, uttid, score=None):
+#		print "Partial %s -- %s" % (text, score)
 		pass
 
-	def on_sphinx_result(self, sphinx, text, uttid):
+	def on_sphinx_result(self, sphinx, text, uttid, score=None):
 		msg = gst.Structure('sphinx_result')
+#		print "Score: ", score
 		msg['text'] = text
 
 		self.bus.post(gst.message_new_application(sphinx, msg))
@@ -123,7 +126,8 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 	def do_POST(self):
 		result = [None]
 
-		stream = tempfile.NamedTemporaryFile(prefix='hciplayer-', suffix='.wav', delete=True)
+		#stream = tempfile.NamedTemporaryFile(prefix='hciplayer-', suffix='.wav', delete=False)
+		stream = open('read_audio.wav','r+')
 
 		length = int(self.headers['Content-length'])
 

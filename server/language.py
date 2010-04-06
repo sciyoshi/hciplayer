@@ -1,4 +1,5 @@
 import pyparsing as pp
+import json
 
 pL = pp.Literal
 pK = pp.Keyword
@@ -15,7 +16,7 @@ class Rules(dict):
 			self[name] << value
 		else:
 			value = value.setResultsName(name)
-			value.setParseAction(lambda: name)
+			value.setParseAction(lambda: {'type': name})
 			super(Rules, self).__setitem__(name, value)
 
 	def __getitem__(self, name):
@@ -39,7 +40,7 @@ class Rules(dict):
 		if item in self.values() and not top:
 			return '<%s>' % item.resultsName
 		elif isinstance(item, pp.Literal):
-			return unicode(item.match)
+			return unicode(item.match).upper()
 		elif isinstance(item, pp.And):
 			return ' '.join(self.transform(x) for x in item.exprs)
 		elif isinstance(item, pp.Optional):
@@ -103,32 +104,78 @@ titles = pG(pp.MatchFirst([pL(title) for title in title_list])).setResultsName('
 #albums = pG(pP('a rush of blood to the head') | pP('lateralus') | pL('evil empire')).setResultsName('album')
 #titles = pG(pL('clocks') | pL('green eyes') | pL('the grudge') | pL('bulls on parade')).setResultsName('title')
 
-filter = pO(pS(pO('all') +  pO(pG(pL('songs') | pL('tracks'))) )) + pO( pG(pP('by') | pP('from')) + pO(pP('artist')) + artists + pO( pG(pP('on') | pP('from')) + pP('album') + albums))
+filter = pO( \
+		pS(pO('all') +  pO(pG(pL('songs') | pL('tracks'))) ) \
+	) + \
+	pO( \
+		pG(pP('by') | pP('from')) + \
+		pO(pP('artist')) + \
+		artists + \
+		pO( \
+			pG(pP('on') | pP('from')) + \
+			pP('album') + albums
+		) \
+	)
 
-select = pG((pO(pG(pP('song') | pP('track'))) + titles + pO(pP('by') + pO('artist') + artists)) + pO(pG(pP('on') | pP('from')) + pO(pP('album')) + albums) | \
-		(pO(pP('artist') + artists) + pO(pP('album') + albums) + pG(pP('song') | pP('track')) + titles) | \
-		pP('album') + albums + pO(pG(pP('track') | pP('song')) + titles)).setResultsName('select')
+select = pG( \
+		pS( \
+			pO( \
+				pG(pP('song') | pP('track')) \
+			) + \
+			titles + \
+			pO( \
+				pP('by') + \
+				pO('artist') + \
+				artists \
+			) + \
+			pO( \
+				pG(pP('on') | pP('from')) + \
+				pO(pP('album')) + \
+				albums \
+			) \
+		) | \
+		pS( \
+			pO(pP('artist')) + \
+			artists +\
+			pO( \
+				pP('album') + \
+				albums \
+			) + \
+			pO( \
+				pG(pP('song') | pP('track')) + \
+				titles \
+			) \
+		) | \
+		pS( \
+			pO(pP('album')) + \
+			albums + \
+			pO( \
+				pG(pP('track') | pP('song')) + \
+				titles
+			) \
+		) \
+	).setResultsName('select')
 
 
 
-rules['playItems'] = pG(pP('put on') | pP('play') | pP('could you play')) + select + pO(select + select + select + select)
+rules['playItems'] = pS(pG(pP('put on') | pP('play') | pP('could you play')) + select)# + pO(pP('and') + select) + pO(pP('and') + select) + pO(pP('and') + select))
 #rules['filterItems'] = pG(pP('put on') | pP('play') | pP('could you play')) + filter
 rules['queueItems'] = pG(pP('queue') | pP('play next')) + select
 
 def action(toks):
-	return ['playItems', ' '.join(toks.select.title), ' '.join(toks.select.album), ' '.join(toks.select.artist)]
+	return [{'type':'playItems', 'args': [{'title': toks.select.title, 'albumTitle':toks.select.album, 'artist':toks.select.artist},]}]
 rules['playItems'].setParseAction(action)
 
 def action(toks):
-	return ['shuffle',' '.join(toks.value)]
+	return [{'type':'shuffle', 'args': toks.value}]
 rules['shuffle'].setParseAction(action)
 
 def action(toks):
-	return ['repeat',' '.join(toks.value)]
+	return [{'type':'repeat', 'args': toks.value}]
 rules['repeat'].setParseAction(action)
 
 def action(toks):
-	return ['queueItems', ' '.join(toks.select.title), ' '.join(toks.select.album), ' '.join(toks.select.artist)]
+	return [{'type':'queueItems', 'args': [{'title': toks.select.title, 'albumTitle':toks.select.album, 'artist':toks.select.artist},]}]
 rules['queueItems'].setParseAction(action)
 
 
@@ -196,4 +243,5 @@ test('play album lateralus')
 test('queue album evil empire')
 test('turn shuffle on')
 test('shuffle toggle')
-test('song green eyes')
+test('queue song green eyes')
+
