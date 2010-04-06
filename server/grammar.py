@@ -7,19 +7,7 @@ import urlparse
 import tempfile
 import subprocess
 
-
-
-#artists = ['coldplay', 'tool', 'rage against the machine']
-#albums = ['a rush of blood to the head', 'lateralus', 'evil empire']
-#songs = ['clocks', 'green eyes', 'the grudge', 'bulls on parade']
 jfsg = tempfile.TemporaryFile()
-
-#template = open('dict/template.jfsg', 'r').read()
-#template = template.replace('{{ARTISTS}}', '|\n'.join(artists))
-#template = template.replace('{{ALBUMS}}', ' |\n'.join(albums))
-#template = template.replace('{{SONGS}}', ' |\n'.join(songs))
-
-#jfsg.write(template)
 
 from language import rules
 jfsg.write('\n'.join(rules.to_jsgf()))
@@ -57,4 +45,3 @@ dic = urlparse.urljoin(req.url, [a['href'] for a in soup('a') if a['href'].endsw
 f = open('dict/grammar.dic', 'w')
 f.write(urllib2.urlopen(dic).read())
 f.close()
-

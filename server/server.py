@@ -5,11 +5,11 @@ import sys
 import struct
 import tempfile
 import threading
-
+import json
 import glib
 import glib.option
 import gobject
-
+import time
 import gst
 
 gobject.threads_init()
@@ -139,22 +139,51 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 
 		def callback(text):
 			print "Got: "+text
-			result[0] = "\n".join(rules.parse(re.sub('\(\d+\)', '', text.lower())))
+			try:
+				result[0] = json.dumps(rules.parse(re.sub('\(\d+\)', '', text.lower()))[0])
+			except:
+				pass
 			finished.set()
 
 		if not self.server.recognizer.recognize(stream.name, callback):
 			self.send_response(500)
 			self.end_headers()
 			return
-
 		finished.wait()
 
 		self.send_response(200)
+
 		self.send_header('Content-type', 'text/plain')
 		self.end_headers()
 		self.wfile.write(result[0])
-
 		print '  --> RESULT: "%s"' % result[0]
+
+	def send_response(self, code, message=None):
+		"""Send the response header and log the response code.
+
+		Also send two standard headers with the server software
+		version and the current date.
+
+		"""
+
+		if message is None:
+			if code in self.responses:
+
+				message = self.responses[code][0]
+			else:
+				message = ''
+	
+		if self.request_version != 'HTTP/0.9':
+
+			self.wfile.write("%s %d %s\r\n" %
+					 (self.protocol_version, code, message))
+			# print (self.protocol_version, code, message)
+
+		self.send_header('Server', self.version_string())
+
+		self.send_header('Date', self.date_time_string())
+
+
 
 class HCIPlayerServer(HTTPServer, object):
 	allow_reuse_address = True

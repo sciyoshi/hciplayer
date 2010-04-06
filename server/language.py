@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pyparsing as pp
 import json
 
@@ -32,9 +33,9 @@ class Rules(dict):
 
 	def parse(self, str):
 		try:
-			return self.commands.parseString(str)
+			return self.commands.parseString(str)[0]
 		except:
-			return []
+			return {}
 
 	def transform(self, item, top=False):
 		if item in self.values() and not top:
@@ -57,7 +58,6 @@ class Rules(dict):
 		yield '#JSGF V1.0;'
 		yield 'grammar hciplayer;'
 		yield 'public <commands> = %s;' % self.transform(self.commands, True)
-		print self.items()
 		for name, rule in self.items():
 			yield '%s = %s;' % (self.transform(rule), self.transform(rule, True))
 
@@ -95,6 +95,7 @@ values = pG(pP('on') | pP('off') | pI(pP('toggle'))).setResultsName('value')
 
 rules['shuffle'] = pO(pG(pP('set') | pP('turn') | pP('toggle'))) + pP('shuffle') + pO(values)
 rules['repeat'] = pO(pG(pP('set') | pP('turn') | pP('toggle'))) + pP('repeat') + pO(values)
+rules['listItems'] = pP('list') + pO(pP('selected'))+ pO(pG(pP('items') | pP('tracks') | pP('songs')))
 
 artists = pG(pp.MatchFirst([pL(artist) for artist in artist_list])).setResultsName('artist')
 albums = pG(pp.MatchFirst([pL(album) for album in album_list])).setResultsName('album')
@@ -103,6 +104,8 @@ titles = pG(pp.MatchFirst([pL(title) for title in title_list])).setResultsName('
 #artists = pG(pP('coldplay') | pP('tool') | pP('rage against the machine')).setResultsName('artist')
 #albums = pG(pP('a rush of blood to the head') | pP('lateralus') | pL('evil empire')).setResultsName('album')
 #titles = pG(pL('clocks') | pL('green eyes') | pL('the grudge') | pL('bulls on parade')).setResultsName('title')
+
+
 
 filter = pO( \
 		pS(pO('all') +  pO(pG(pL('songs') | pL('tracks'))) ) \
@@ -135,7 +138,7 @@ select = pG( \
 			) \
 		) | \
 		pS( \
-			pO(pP('artist')) + \
+			pP('artist') + \
 			artists +\
 			pO( \
 				pP('album') + \
@@ -147,7 +150,7 @@ select = pG( \
 			) \
 		) | \
 		pS( \
-			pO(pP('album')) + \
+			pP('album') + \
 			albums + \
 			pO( \
 				pG(pP('track') | pP('song')) + \
@@ -159,89 +162,56 @@ select = pG( \
 
 
 rules['playItems'] = pS(pG(pP('put on') | pP('play') | pP('could you play')) + select)# + pO(pP('and') + select) + pO(pP('and') + select) + pO(pP('and') + select))
-#rules['filterItems'] = pG(pP('put on') | pP('play') | pP('could you play')) + filter
+rules['selectItems'] = pG(pP('select') | pP('filter')) + select
 rules['queueItems'] = pG(pP('queue') | pP('play next')) + select
 
+def val(a):
+	try:
+		return str(a[0])
+	except:
+		return ''
+
 def action(toks):
-	return [{'type':'playItems', 'args': [{'title': toks.select.title, 'albumTitle':toks.select.album, 'artist':toks.select.artist},]}]
+	return {'type':'playItems', 'args': [{'title': val(toks.select.title), 'albumTitle':val(toks.select.album), 'artist':val(toks.select.artist)},]}
 rules['playItems'].setParseAction(action)
 
 def action(toks):
-	return [{'type':'shuffle', 'args': toks.value}]
+	return {'type':'shuffle', 'args': val(toks.value)}
 rules['shuffle'].setParseAction(action)
 
 def action(toks):
-	return [{'type':'repeat', 'args': toks.value}]
+	return {'type':'repeat', 'args': val(toks.value)}
 rules['repeat'].setParseAction(action)
 
 def action(toks):
-	return [{'type':'queueItems', 'args': [{'title': toks.select.title, 'albumTitle':toks.select.album, 'artist':toks.select.artist},]}]
+	return {'type':'queueItems', 'args': [{'title': val(toks.select.title), 'albumTitle':val(toks.select.album), 'artist':val(toks.select.artist)},]}
 rules['queueItems'].setParseAction(action)
 
+def action(toks):
+	return {'type':'selectItems', 'args': [{'title': val(toks.select.title), 'albumTitle':val(toks.select.album), 'artist':val(toks.select.artist)},]}
+rules['selectItems'].setParseAction(action)
 
+if __name__ == '__main__':
+	print
+	print '========= JSGF FILE ============='
+	print
+	print '\n'.join(rules.to_jsgf())
+	print
+	print '============ END ================'
+	print
 
-#pP('list available commands') | pP('help me') | pP('what can i say')
-"""
-rules['selectItems'] = pP('list available commands') | pP('help me') | pP('what can i say')
+	def test(a):
+		print 'Parsing', repr(a)
+		print str(rules.parse(a))
 
-rules['listItems'] = pP('list available commands') | pP('help me') | pP('what can i say')
-
-library = [
-	('radiohead', 'kid a', 'everything in it\'s right place'),
-	('radiohead', 'kid a', 'kid a'),
-]
-
-rules
-
-<artist>
-<album>
-
-
-<filter> =
-	[all] [songs | tracks | albums] | [every] [song | track | artist]
-
-	[[by] [artist] <artist>] [on [album] <album>] |
-	
-<singleFilter> =
-	[song | track] <title> [by [ artist ] <artist>
-
-<playItems> = 
-	(put on | play | could you play) <filter>
-	
-
-play that radiohead song
-
-[all | every] [songs | tracks] [ [by] [artist] <artist> ]
-
-[all] songs by <artist> on <album>
-[all] songs on <album> by <artist>
-
-song|track <track>
-song|track <track> by artist
-song|track <track> by artist on album
-
-"""
-
-print
-print '========= JSGF FILE ============='
-print
-print '\n'.join(rules.to_jsgf())
-print
-print '============ END ================'
-print
-
-def test(str):
-	print 'Parsing', repr(str)
-	print rules.parse(str)
-
-test('play next song')
-test('play')
-test('what can i say')
-test('next')
-test('play artist coldplay')
-test('play album lateralus')
-test('queue album evil empire')
-test('turn shuffle on')
-test('shuffle toggle')
-test('queue song green eyes')
+	test('play next song')
+	test('play')
+	test('what can i say')
+	test('next')
+	test('play artist coldplay')
+	test('play album lateralus')
+	test('queue album evil empire')
+	test('turn shuffle on')
+	test('shuffle toggle')
+	test('queue song green eyes')
 
