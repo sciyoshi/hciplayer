@@ -22,7 +22,7 @@
 			<key>Key</key>
 			<string>ip_address</string>
 			<key>DefaultValue</key>
-			<string>192.168.1.101</string>
+			<string>192.168.1.64</string>
 			<key>IsSecure</key>
 			<false/>
 			<key>KeyboardType</key>

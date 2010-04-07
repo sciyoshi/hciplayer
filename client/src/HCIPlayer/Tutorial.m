@@ -1,15 +1,9 @@
-#import "MainViewController.h"
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-#import "HCIPlayerAppDelegate.h"
-#import "VoiceRecognizer.h"
-#import "Gestures.h"
-#import "Commands.h"
-
-#import <Celestial/Celestial.h>
 #import "Tutorial.h"
-#import <time.h>
-
-#define SAY(str) [self.feedback sayText:@str]
+#import "Gesture.h"
+#import "MainViewController.h"
 
 @implementation Tutorial
 
@@ -17,10 +11,9 @@
 @synthesize state;
 @synthesize feedback;
 
--(id)init: (AudioFeedback*) _feedback
+- (id) init: (AudioFeedback*) _feedback
 {
-	if (self = [super init])
-	{
+	if (self = [super init]) {
 		self.feedback = _feedback;
 		self.state = TUT_OFF;
 	}
@@ -29,7 +22,7 @@
 
 - (BOOL) compareCommand: (Command) command
 {
-	return self.cmd.type == command.type && (command.gesture == nil || UIGestureRecognizerStateRecognized == [command.gesture state]);
+	return self.cmd.type == command.type && (command.gesture == nil || command.gesture.state == UIGestureRecognizerStateRecognized);
 }
 
 /**
@@ -38,29 +31,31 @@
  */
 -(BOOL) handleCommand: (Command) command
 {
-	//If it's off and not to be started, just let it slide
-	if(self.state == TUT_OFF && command.type != COMMAND_TUTORIAL)
-		return true;
+	// if it's off and not to be started, just let it slide
+	if (self.state == TUT_OFF && command.type != COMMAND_TUTORIAL)
+		return YES;
 
-	if(self.state != TUT_OFF && command == COMMAND_EXIT) {
+	if (self.state != TUT_OFF && command.type  == COMMAND_EXIT) {
 		self.state = TUT_OFF;
 		[self runCommand];
-		return true;
+		return NO;
 	}
 
-	if(self.cmd == command) {
-		command++;
-		[self runCommand];
-		if(self.state == TUT_DONE) {
-			self.cmd == TUT_OFF;
+	if (self.cmd.type == command.type) {
+		if (command.gesture == nil || command.gesture.state == UIGestureRecognizerStateRecognized) {
+			state++;
 			[self runCommand];
 		}
-		return true;
-	} else if (self.state == TUT_OFF && command == COMMAND_TUTORIAL) {
+		return YES;
+	} else if (self.state == TUT_INTRO || (self.state == TUT_OFF && command.type == COMMAND_TUTORIAL)) {
 		self.state = TUT_INTRO;
 		[self runCommand];
+	} else if (self.cmd.type != command.type) {
+		if (command.gesture == nil || command.gesture.state == UIGestureRecognizerStateRecognized) {
+			return NO;
+		}
 	}
-	return false;
+	return NO;
 }
 
 /**
@@ -68,61 +63,60 @@
  */
 -(void) runCommand
 {
-	switch(self.state)
+	switch (self.state)
 	{
 		case TUT_OFF:
-			SAY("Now exiting the tutorial");
+			SAY(@"Now exiting the tutorial");
 			break;
 		case TUT_INTRO:
-			SAY("Hello, and welcome to the HCIplayer portable music player tutorial. At any time you can exit this tutorial with the voice command 'exit'.");
-			SAY("We will now walk you through some of the basic operations of the player:");
-		case TUT_TAP_ONCE:
-			SAY("Tap the screen once to begin playback");
-			self.cmd.type = COMMAND_TAP;
+			SAY(@"Hello, and welcome to the H.C.I. portable music player tutorial. At any time you can exit this tutorial with the voice command 'exit'. \
+			We will now walk you through some of the basic operations of the player: \
+			Tap the screen once to begin playback");
+			cmd.type = COMMAND_TAP;
 			break;
 		case TUT_ADJUST_VOL:
-			SAY("Good! Now try adjusting the volume by dragging up or down on the screen.");
-			self.cmd.type = COMMAND_SWIPE_UPDOWN;
+			SAY(@"Good! Now try adjusting the volume by dragging up or down on the screen.");
+			cmd.type = COMMAND_SWIPE_UPDOWN;
 			break;
 		case TUT_TAP_AGAIN:
-			SAY("Pause the music again by tapping the screen again");
-			self.cmd.type = COMMAND_TAP;
+			SAY(@"Pause the music again by tapping the screen again");
+			cmd.type = COMMAND_TAP;
 			break;
 		case TUT_SAY_PLAY:
-			SAY("Now hold a finger on the screen to issue the 'play' voice command. After a moment, you will feel a vibration, signalling for you to start speaking. When you are done speaking, release the screen. Issue the 'play' command");
-			self.cmd.type = COMMAND_PLAY;
+			SAY(@"Now you will issue the voice command \"play\". To do this, you must hold your finger on the screen and wait until you feel a vibration, signalling for you to start speaking. When you are done speaking, release the screen.");
+			cmd.type = COMMAND_PLAY;
 			break;
 		case TUT_SWIPE_NEXT:
-			SAY("Now advance to the next track by swiping a finger to the right on the screen");
-			self.cmd.type = COMMAND_SWIPE_RIGHT;
+			SAY(@"Now advance to the next track by swiping a finger to the right on the screen");
+			cmd.type = COMMAND_SWIPE_RIGHT;
 			break;
 		case TUT_SWIPE_PREV:
-			SAY("Try the reverse as well, swiping back to the left");
-			self.cmd.type = COMMAND_SWIPE_LEFT;
+			SAY(@"Try the reverse as well, swiping back to the left");
+			cmd.type = COMMAND_SWIPE_LEFT;
 			break;
-		/*
 		case TUT_SAY_ARTIST:
-			SAY("Now try selecting an artist to play. Issue a voice command like before, but this time say 'play artist tool'");
-			
+			SAY(@"Now try selecting an artist to play. Issue a voice command like before, but this time say 'play artist tool'");
+			cmd.type = COMMAND_PLAY_ITEMS;
 			break;
 		case TUT_SAY_SONG:
-			SAY("You can be more specific too. Try playing a particular song by saying 'play artist rage against the machine song bulls on parade'");
+			SAY(@"You can be more specific too. Try playing a particular song by saying 'play artist rage against the machine song bulls on parade'");
+			cmd.type = COMMAND_PLAY_ITEMS;
 			break;
 		case TUT_QUEUE_SONG:
-			SAY("In addition to immediately playing a song, you can queue it for later. The 'queue' command works just like the 'play' command. Try to queue an album by saying 'queue artist coldplay album a rush of blood to the head'");
+			SAY(@"In addition to immediately playing a song, you can queue it for later. The 'queue' command works just like the 'play' command. Try to queue an album by saying 'queue artist coldplay album a rush of blood to the head'");
+			cmd.type = COMMAND_QUEUE_ITEMS;
 			break;
-		*/
 		case TUT_SAY_NEXT:
-			SAY("Now try advancing to the next song with the voice command 'next'");
-			self.cmd.type = COMMAND_NEXT;
+			SAY(@"Now try advancing to the next song with the voice command 'next'");
+			cmd.type = COMMAND_NEXT;
 			break;
 		case TUT_SEEK:
-			SAY("Just like you used your finger to adjust the volume, you can seek through the current track by tapping, and then moving left and right. Try seeking forward a bit.");
-			self.cmd.type = COMMAND_SWIPE_LEFTRIGHT;
+			SAY(@"Just like you used your finger to adjust the volume, you can seek through the current track by tapping, and then moving left and right. Try seeking forward a bit.");
+			cmd.type = COMMAND_SWIPE_LEFTRIGHT;
 			break;
 		case TUT_REPLAY:
-			SAY("You can easily return the beginning of a song by issuing the voice command, 'replay'. Try this now.");
-			self.cmd.type = COMMAND_REPLAY;
+			SAY(@"You can easily return the beginning of a song by issuing the voice command, 'replay'. Try this now.");
+			cmd.type = COMMAND_REPLAY;
 			break;
 		/*
 		case TUT_SHUFFLE_ON:
@@ -139,7 +133,8 @@
 			break;
 		*/
 		case TUT_DONE:
-			SAY("Congratulations! You have completed the HCIPlayer tutorial. We hope that this system is able to help you listen to music like never before!");
+			SAY(@"Congratulations! You have completed the HCIPlayer tutorial. We hope that this system is able to help you listen to music like never before!");
+			self.state = TUT_OFF;
 			break;
 	}
 }

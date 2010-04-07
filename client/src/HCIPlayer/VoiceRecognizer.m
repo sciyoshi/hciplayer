@@ -113,14 +113,14 @@
 {
 	NSError *error = [request error];
 
-	[self showErrorDialog:error withMessage:@"Error communicating with recognition server."];
-
+	[self.delegate voiceRecognitionFailed:self withError:error];
+	
 	[self reset];
 }
 
-- (void) audioRecorderEncodeErrorDidOccur: (AVAudioRecorder *) rec error: (NSError *) error
+- (void) audioRecorderEncodeErrorDidOccur: (AVAudioRecorder *) rec withError: (NSError *) error
 {
-	[self showErrorDialog:error withMessage:@"Error recording audio."];
+	NSLog(@"Error recording audio.");
 
 	[self reset];
 }

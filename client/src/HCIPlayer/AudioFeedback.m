@@ -45,7 +45,10 @@
 - (void) playTextFromFile: (NSString *) file
 {
 	NSError *error = nil;
-
+	if (self.player) {
+		[[self player] stop];
+		[[AudioController sharedInstance] finishPlayback];
+	}
 	self.player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:file] error:&error];
 
 	if (error) {

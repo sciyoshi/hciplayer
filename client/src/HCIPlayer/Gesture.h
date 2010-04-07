@@ -18,7 +18,7 @@ typedef enum {
 	UIGestureRecognizerStateRecognized = UIGestureRecognizerStateEnded  
 } UIGestureRecognizerState;
 
-@interface SimplePathGestureRecognizer : UIGestureRecognizer
+@interface SimplePathGestureRecognizer : UIPanGestureRecognizer
 {
 @protected
 	CGPoint _start;

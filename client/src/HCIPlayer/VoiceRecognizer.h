@@ -31,6 +31,7 @@
 @optional
 
 - (void) voiceRecognitionFinished: (VoiceRecognizer *) recognizer withText: (NSString *) text;
+- (void) voiceRecognitionFailed: (VoiceRecognizer *) recognizer withError:(NSError*) error;
 - (void) voiceRecordingStopped: (VoiceRecognizer *) recognizer successfully: (BOOL) flag;
 
 @end

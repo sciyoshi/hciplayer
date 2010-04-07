@@ -1,8 +1,6 @@
 #import <Foundation/Foundation.h>
-
 #import <UIKit/UIKit.h>
 #import <UIKit/UIGestureRecognizer.h>
-#import <UIKit/UIView-UIViewGestures.h>
 
 typedef enum {
 	COMMAND_NONE,
@@ -12,7 +10,7 @@ typedef enum {
 	COMMAND_SWIPE_UPDOWN,
 	COMMAND_SWIPE_LEFTRIGHT,
 	COMMAND_PLAY,
-	COMMAND_PAUSE,
+	COMMAND_PAUSE,	
 	COMMAND_NEXT,
 	COMMAND_PREVIOUS,
 	COMMAND_REPLAY,
@@ -24,6 +22,8 @@ typedef enum {
 	COMMAND_REPEAT,
 	COMMAND_PLAY_ITEMS,
 	COMMAND_QUEUE_ITEMS,
+	COMMAND_SELECT_ITEMS,
+	COMMAND_LIST_ITEMS,	
 } CommandType;
 
 typedef enum {
@@ -36,7 +36,6 @@ typedef struct {
 	CommandType type;
 	UIGestureRecognizer *gesture;
 	CommandArg arg;
-	NSString *title;
-	NSString *album;
-	NSString *artist;
+	NSString *raw;
+	NSArray *filters;
 } Command;
