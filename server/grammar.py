@@ -10,6 +10,7 @@ import subprocess
 jsgf = tempfile.TemporaryFile()
 
 from language import rules
+print '\n'.join(rules.to_jsgf())
 jsgf.write('\n'.join(rules.to_jsgf()))
 
 jsgf.seek(0)

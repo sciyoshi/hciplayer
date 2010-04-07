@@ -138,6 +138,7 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 		def callback(text):
 			print "Got: "+text
 			try:
+				print text
 				result[0] = json.dumps(rules.parse(re.sub('\(\d+\)', '', text.lower())))
 			except:
 				pass
