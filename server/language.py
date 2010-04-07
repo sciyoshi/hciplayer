@@ -11,9 +11,24 @@ pG = pp.Group
 pI = pp.Suppress
 pOoM = pp.OneOrMore
 
+class Commands(set):
+	def __init__(self, rules):
+		self.rules = rules
+
+	def __setitem__(self, name, value):
+		self.rules[name] = value
+		self.add(name)
+
+	@property
+	def parser(self):
+		return pp.Or([self.rules[name] for name in self])
+
 class Rules(object):
-	def __init__(self):
+	def __init__(self, parser, public='commands'):
+		self.parser = parser
+		self.public = public
 		self.rules = {}
+		self.commands = Commands(self)
 
 		ruleName = pp.Combine(pp.Suppress('<') + pp.Word(pp.alphanums) + pp.Suppress('>'))
 		ruleName.setParseAction(lambda toks: self[toks[0]])
@@ -30,27 +45,34 @@ class Rules(object):
 		optExpr.setParseAction(lambda toks: pp.Optional(toks[0][0]))
 
 		groupExpr = pp.nestedExpr(opener='(', closer=')', content=alt)
-		groupExpr.setParseAction(lambda toks: pp.Group(toks[0][0]))
+		groupExpr.setParseAction(lambda toks: toks[0][0])
 
 		word = pp.Word(pp.alphanums + r"'\"")
-		word.setParseAction(lambda toks: pp.Suppress(pp.Keyword(toks[0])))
+		word.setParseAction(lambda toks: pp.Keyword(toks[0]))
 
-		expr << pp.Or([ruleName, optExpr, groupExpr, word])
+		token = pp.Or([ruleName, optExpr, groupExpr, word])
+
+		zeroOrMore = token + pp.Suppress(pp.Literal('*'))
+		zeroOrMore.setParseAction(lambda toks: pp.ZeroOrMore(toks[0]))
+
+		oneOrMore = token + pp.Suppress(pp.Literal('+'))
+		oneOrMore.setParseAction(lambda toks: pp.OneOrMore(toks[0]))
+
+		elem = pp.Or([token, oneOrMore, zeroOrMore])
+
+		expr << (elem + pp.Optional(pp.Combine(pp.Suppress('/') + pp.Word(pp.alphanums))).setResultsName('tag'))
+		expr.setParseAction(self.parseExpr)
+
+	def parseExpr(self, tokens):
+		token = tokens[0]
+		if tokens.tag:
+			token = pp.Group(token).setResultsName(tokens.pop(1))
+			token.setParseAction(lambda toks: toks[0])
+		return token
 
 	def __setitem__(self, name, value):
-		manual = False
-
-		if isinstance(name, tuple):
-			name, manual = name
-		elif not isinstance(value, (str, unicode)):
-			manual = True
-
 		if isinstance(value, (str, unicode)):
 			value = self.rule.parseString(value)[0].setResultsName(name)
-
-		if not manual:
-			value = value.setResultsName(name)
-			value.setParseAction(lambda: {'type': name})
 
 		if name in self.rules:
 			self.rules[name] << value
@@ -58,25 +80,22 @@ class Rules(object):
 			self.rules[name] = value
 
 	def __getitem__(self, name):
-		if name in self.rules:
-			return self.rules[name]
-		else:
-			self.rules[name] = pp.Forward().setResultsName(name)
-			self.rules[name].setParseAction(lambda: {'type': name})
-			return self.rules[name]
+		if name not in self.rules:
+			self.rules[name] = pp.Forward()
+			self.rules[name] = self.rules[name].setResultsName(name)
+		return self.rules[name]
 
 	def __delitem__(self, name):
 		del self.rules[name]
 
-	@property
-	def commands(self):
-		return pp.Or(self.rules.values()).setResultsName('command')
-
 	def parse(self, str):
 		try:
-			return self.commands.parseString(str)[0]
+			result = self.commands.parser.parseString(str)
 		except:
-			return {}
+			return
+		for command in self.commands:
+			if command in result:
+				return self.parser(command, result)
 
 	def transform(self, item, top=False):
 		if item in self.rules.values() and not top:
@@ -89,7 +108,11 @@ class Rules(object):
 			return '[ %s ]' % self.transform(item.expr)
 		elif isinstance(item, pp.Group):
 			return '( %s )' % self.transform(item.expr)
-		elif isinstance(item, (pp.Suppress, pp.Forward)):
+		elif isinstance(item, pp.OneOrMore):
+			return '%s +' % self.transform(item.expr)
+		elif isinstance(item, pp.ZeroOrMore):
+			return '%s *' % self.transform(item.expr)
+		elif isinstance(item, (pp.Forward, pp.Suppress)):
 			return self.transform(item.expr)
 		elif isinstance(item, (pp.MatchFirst, pp.Or)):
 			return ' | '.join(self.transform(x) for x in item.exprs)
@@ -98,105 +121,87 @@ class Rules(object):
 	def to_jsgf(self):
 		yield '#JSGF V1.0;'
 		yield 'grammar hciplayer;'
-		yield 'public <commands> = %s;' % self.transform(self.commands, True)
+		yield 'public <commands> = %s;' % self.transform(self.commands.parser, True)
 		for name, rule in self.rules.items():
 			yield '%s = %s;' % (self.transform(rule), self.transform(rule, True))
 
-
-artist_list = ['coldplay', 'tool', 'rage against the machine']
-album_list = ['a rush of blood to the head', 'lateralus', 'evil empire']
-title_list = [
+artists = ['coldplay', 'tool', 'rage against the machine']
+albums = ['a rush of blood to the head', 'lateralus', 'evil empire']
+titles = [
 	'politik', 'in my place', 'god put a smile upon your face', 'the scientist', 'clocks', 'daylight', 'green eyes', 'warning sign', 'a whisper', 'a rush of blood to the head', 'amsterdam',
 	'the grudge', 'eon blue apocalypse', 'the patient', 'mantra', 'schism', 'parabol', 'parabola', 'ticks and leeches', 'lateralus', 'disposition', 'reflection', 'triad', 'faaip de oiad',
 	'people of the sun', 'bulls on parade', 'vietnow', 'revolver', 'snakecharmer', 'tire me', 'down rodeo', 'without a face', 'wind below', 'roll right', 'year of tha boomerang'
 ]
 
-rules = Rules()
+def parser(item, result):
+	if item in ['play', 'pause', 'next', 'previous', 'replay', 'info', 'help', 'exit', 'tutorial']:
+		return {'type': item}
+	elif item in ['shuffle', 'repeat']:
+		return {'type': item, 'arg': result.get('stateValue', [''])[0]}
+	elif item in ['playItems', 'queueItems', 'selectItems', 'listItems']:
+		if 'filterValue' in result:
+			arg = [{
+				'title': ' '.join(filter[0].get('filterTitle', [])),
+				'artist': ' '.join(filter[0].get('filterArtist', [])),
+				'albumTitle': ' '.join(filter[0].get('filterAlbum', []))
+			} for filter in result._ParseResults__tokdict['filterValue']]
+		else:
+			arg = list(result.get('selectorValue', []))
 
-rules['play'] = 'play'
+		return {'type': item, 'arg': arg}
 
-rules['pause'] = 'pause | stop'
+rules = Rules(parser)
 
-rules['next'] = '[ play ] next [ song | track ]'
+rules.commands['play'] = 'play'
 
-rules['previous'] = '[ play ] previous [ song | track ]'
+rules.commands['pause'] = 'pause | stop'
 
-rules['replay'] = 'replay [ song | track ]'
+rules.commands['next'] = '[ play ] next [ song | track ]'
 
-rules['info'] = r"what's playing | what is playing | now playing | info"
+rules.commands['previous'] = '[ play ] previous [ song | track ]'
 
-rules['help'] = 'list available commands | help me | what can i say'
+rules.commands['replay'] = 'replay [ song | track ]'
 
-rules['exit'] = 'exit'
+rules.commands['info'] = r"what's playing | what is playing | now playing | info"
 
-rules['tutorial'] = 'tutorial'
+rules.commands['help'] = 'list available commands | help me | what can i say'
 
-rules['value'] = pG(pP('on') | pP('off') | pI(pP('toggle'))).setResultsName('value')
+rules.commands['exit'] = 'exit'
 
-rules['shuffle'] = '[ set | turn | toggle ] shuffle [ <value> ]'
-rules['shuffle'].setParseAction(lambda toks: {'type': 'shuffle', 'args': toks.value[0] if toks.value else ''})
+rules.commands['tutorial'] = 'tutorial'
 
-rules['repeat'] = '[ set | turn | toggle ] repeat <value>'
-rules['repeat'].setParseAction(lambda toks: {'type': 'repeat', 'args': toks.value[0] if toks.value else ''})
+rules['state'] = '( on | off ) /stateValue | toggle'
 
-del rules['value']
+rules.commands['shuffle'] = '[ set | turn | toggle ] shuffle [ <state> ]'
 
-rules['artists'] = pG(pp.MatchFirst([pL(artist) for artist in artist_list])).setResultsName('artists')
-rules['albums'] = pG(pp.MatchFirst([pL(album) for album in album_list])).setResultsName('albums')
-rules['titles'] = pG(pp.MatchFirst([pL(title) for title in title_list])).setResultsName('titles')
+rules.commands['repeat'] = '[ set | turn | toggle ] repeat [ <state> ]'
 
-rules['selectors', True] = (pG(pO(pP('selected') | pP('all'))) + pO(pP('songs') | pP('tracks') | pP('items'))).setResultsName('selectors')
+rules['artists'] = '( %s )' % (' | '.join(artists))
+rules['albums'] = '( %s )' % (' | '.join(albums))
+rules['titles'] = '( %s )' % (' | '.join(titles))
 
-rules['selectors'].setParseAction(lambda toks: [toks[0] if toks[0] else ''])
+rules['selectors'] = '[ selected | all ] /selectorValue [ songs | tracks | items ]'
 
-rules['filters', True] = """(
-	[ song | track ] <titles>
-	[ by [ artist ] <artists> ]
-	[ on [ album ] <albums> ]
-) | (
-	artist <artists>
-	[ album <albums> ] 
-	[ [ song | track ] <albums> ]
-) | (
-	album <albums>
-	[ [ song | track ] <albums> ]
-)"""
+rules['filters'] = '''(
+	[ song | track ] <titles> /filterTitle
+	[ by [ artist ] <artists> /filterArtist ]
+	[ on [ album ] <albums> /filterAlbum ]
+|
+	artist <artists> /filterArtist
+	[ album <albums> /filterAlbum ]
+	[ [ song | track ] <titles> /filterTitle ]
+|
+	album <albums> /filterAlbum
+	[ [ song | track ] <titles> /filterTitle ]
+) /filterValue'''
 
-rules['filters'].setParseAction(lambda toks: [{
-	'title': toks.filters.titles[0] if toks.filters.titles else '',
-	'albumTitle': toks.filters.albums[0] if toks.filters.albums else '',
-	'artist': toks.filters.artists[0] if toks.filters.artists else ''
-}] if toks else [()])
+rules.commands['playItems'] = '( put on | play | could you play ) ( <selectors> | ( <filters> [ and ] ) + )'
 
-rules['playItems'] = '( put on | play | could you play ) ( <selectors> | <filters> )'
-rules['playItems'].setParseAction(lambda toks: {
-	'type': 'playItems',
-	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
-})
+rules.commands['queueItems'] = '( queue | play next ) ( <selectors> | ( <filters> [ and ] ) + )'
 
-rules['queueItems'] = '( queue | play next ) ( <selectors> | <filters> )'
-rules['queueItems'].setParseAction(lambda toks: {
-	'type': 'queueItems',
-	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
-})
+rules.commands['selectItems'] = '( select | filter ) ( <selectors> | ( <filters> [ and ] ) + )'
 
-rules['selectItems'] = '( select | filter ) ( <selectors> | <filters> )'
-rules['selectItems'].setParseAction(lambda toks: {
-	'type': 'selectItems',
-	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
-})
-
-rules['listItems'] = '( list ) ( <selectors> | <filters> )'
-rules['listItems'].setParseAction(lambda toks: {
-	'type': 'listItems',
-	'args': [toks[1].filters] if toks[1].filters else toks[1].selectors[0]
-})
-
-del rules['artists']
-del rules['albums']
-del rules['titles']
-del rules['selectors']
-del rules['filters']
+rules.commands['listItems'] = 'list ( <selectors> | <filters> )'
 
 if __name__ == '__main__':
 	print
@@ -208,11 +213,13 @@ if __name__ == '__main__':
 	print
 
 	def test(a):
-		print 'Parsing', repr(a)
-		print str(rules.parse(a))
+		print 'TEST:', repr(a)
+		print '  ->', repr(rules.parse(a))
+		print
 
 	test('play next song')
 	test('play')
+	test('play all')
 	test('what can i say')
 	test('next')
 	test('play artist coldplay')
@@ -223,4 +230,4 @@ if __name__ == '__main__':
 	test('shuffle toggle')
 	test('queue song green eyes')
 	test('list')
-
+	test('play artist coldplay and song lateralus album evil empire')

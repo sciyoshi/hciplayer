@@ -125,8 +125,7 @@ class HCIPlayerRequestHandler(BaseHTTPRequestHandler):
 	def do_POST(self):
 		result = [None]
 
-		#stream = tempfile.NamedTemporaryFile(prefix='hciplayer-', suffix='.wav', delete=False)
-		stream = open('read_audio.wav','r+')
+		stream = tempfile.NamedTemporaryFile(prefix='hciplayer-', suffix='.wav', delete=True)
 
 		length = int(self.headers['Content-length'])
 
