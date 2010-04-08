@@ -12,6 +12,9 @@ import glib.option
 import gobject
 import time
 import gst
+import psyco
+psyco.profile()
+
 
 gobject.threads_init()
 
@@ -50,7 +53,7 @@ class Recognizer(object):
 		self.sphinx.props.dict = self.get_file_name('.dic')
 		self.sphinx.props.fsg = self.get_file_name('.fsg')
 		# self.sphinx.props.bestpath = True
-		self.sphinx.props.maxhmmpf = 2000
+		self.sphinx.props.maxhmmpf = 1000
 		self.sphinx.props.configured = True
 
 		self.pipeline.auto_clock()

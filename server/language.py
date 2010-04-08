@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import pyparsing as pp
 import json
+import psyco
+pp.ParserElement.enablePackrat()
+psyco.full()
 
 pL = pp.Literal
 pK = pp.Keyword
@@ -33,27 +36,27 @@ class Rules(object):
 		self.rules = {}
 		self.commands = Commands(self)
 
-		ruleName = pp.Combine(pp.Suppress('<') + pp.Word(pp.alphanums + '.') + pp.Suppress('>'))
+		ruleName = pp.Combine(pp.Suppress('<') + pp.Word(pp.alphanums + '_.') + pp.Suppress('>'))
 		ruleName.setParseAction(lambda toks: self[toks[0]])
 
 		expr = pp.Forward()
 
-		seq = pp.Group(pp.delimitedList(expr, delim=pp.Empty()))
-		seq.setParseAction(lambda toks: pp.And(toks[0]))
+		seq = pp.delimitedList(expr, delim=pp.Empty())
+		seq.setParseAction(lambda toks: pp.And(toks.asList()) if len(toks.asList()) > 1 else None)
 
-		self.rule = alt = pp.Group(pp.delimitedList(seq, delim='|'))
-		alt.setParseAction(lambda toks: pp.Or(toks[0]))
+		self.rule = alt = pp.delimitedList(seq, delim='|')
+		alt.setParseAction(lambda toks: pp.Or(toks.asList()) if len(toks.asList()) > 1 else None)
 
-		optExpr = pp.nestedExpr(opener='[', closer=']', content=alt)
-		optExpr.setParseAction(lambda toks: pp.Optional(toks[0][0]))
-
-		groupExpr = pp.nestedExpr(opener='(', closer=')', content=alt)
-		groupExpr.setParseAction(lambda toks: Grouping(toks[0][0]))
+		groupExpr = pp.Suppress('(') + alt + pp.Suppress(')')
+		groupExpr.setParseAction(lambda toks: Grouping(toks[0]))
 
 		word = pp.Word(pp.alphanums + r".&'\"")
 		word.setParseAction(lambda toks: pp.Keyword(toks[0]))
 
-		token = pp.Or([ruleName, groupExpr, optExpr, word])
+		token = groupExpr | ruleName | word
+
+		optExpr = pp.Suppress('[') + alt + pp.Suppress(']')
+		optExpr.setParseAction(lambda toks: pp.Optional(toks[0]))
 
 		zeroOrMore = token + pp.Suppress(pp.Literal('*'))
 		zeroOrMore.setParseAction(lambda toks: pp.ZeroOrMore(toks[0]))
@@ -61,16 +64,17 @@ class Rules(object):
 		oneOrMore = token + pp.Suppress(pp.Literal('+'))
 		oneOrMore.setParseAction(lambda toks: pp.OneOrMore(toks[0]))
 
-		elem = pp.Or([token, oneOrMore, zeroOrMore])
+		elem = zeroOrMore | oneOrMore | optExpr | token
 
-		expr << (elem + pp.Optional(pp.Combine(pp.Suppress('/') + pp.Word(pp.alphanums + '.'))).setResultsName('tag'))
-		expr.setParseAction(self.parseExpr)
+		tagged = elem + pp.Combine(pp.Suppress('/') + pp.Word(pp.alphanums)).setResultsName('tag')
+		tagged.setParseAction(self.parseExpr)
+
+		expr << (tagged | elem)
 
 	def parseExpr(self, tokens):
 		token = tokens[0]
 		if tokens.tag:
 			token = pp.Group(token).setResultsName(tokens.pop(1))
-			token.setParseAction(lambda toks: toks[0])
 		return token
 
 	def __setitem__(self, name, value):
@@ -101,19 +105,22 @@ class Rules(object):
 			return
 		for command in self.commands:
 			if command in result:
-				return self.parser(command, result)
+				return self.parser(command, result[command])
 
 	def transform(self, item, top=False):
 		if item in self.rules.values() and not top:
 			return '<%s>' % item.resultsName
 		elif isinstance(item, (pp.Literal, pp.Keyword)):
 			return unicode('`' + word_map.get(item.match) + '`' if item.match in word_map else item.match).upper()
-		elif isinstance(item, (pp.Group, Grouping)):
-			return '( %s )' % self.transform(item.expr)
+		elif isinstance(item, (Grouping, pp.Group)):
+			if not isinstance(item.expr, (Grouping, pp.Group)):
+				return '( %s )' % self.transform(item.expr)
+			else:
+				return '%s' % self.transform(item.expr)
 		elif isinstance(item, pp.And):
 			return ' '.join(self.transform(x) for x in item.exprs)
 		elif isinstance(item, pp.Optional):
-			return '[ %s ]' % self.transform(item.expr)
+			return '( %s | <NULL>)' % self.transform(item.expr)
 		elif isinstance(item, pp.OneOrMore):
 			return '%s +' % self.transform(item.expr)
 		elif isinstance(item, pp.ZeroOrMore):
@@ -137,16 +144,17 @@ def parser(item, result):
 	if item in ['play', 'pause', 'next', 'previous', 'replay', 'info', 'help', 'exit', 'tutorial']:
 		return {'type': item}
 	elif item in ['shuffle', 'repeat']:
-		return {'type': item, 'args': result.get('stateValue', [''])[0]}
+		return {'type': item, 'args': [result.get('stateValue', [''])[0]]}
 	elif item in ['playItems', 'queueItems', 'selectItems', 'listItems']:
-		if 'filterValue' in result:
+		args = ['']
+		if result.get('filters'):
 			args = [{
 				'title': ' '.join(filter[0].get('filterTitle', [])),
 				'artist': ' '.join(filter[0].get('filterArtist', [])),
 				'albumTitle': ' '.join(filter[0].get('filterAlbum', []))
-			} for filter in result._ParseResults__tokdict['filterValue']]
-		else:
-			args = list(result.get('selectorValue', []) or [''])
+			} for filter in result._ParseResults__tokdict['filters']]
+		elif result.get('selectorValue'):
+			args = [result.get('selectorValue', [''])[0]]
 
 		return {'type': item, 'args': args}
 
@@ -207,29 +215,18 @@ rules.commands['repeat'] = '[ set | turn | toggle ] repeat [ <state> ]'
 
 rules['selectors'] = '[ selected | all ] /selectorValue [ songs | tracks | items ]'
 
-for artist in artists.values():
-	rules['hciplayer.%s' % ( _(artist['name']) )] = '( %s )' % artist['name']
-	for album in artist['albums']:
-		rules['hciplayer.%s.%s' % (_(album['artist']['name']), _(album['name']))] = '(%s)' % album['name']
-		rules['hciplayer.%s.%s.titles' % (_(album['artist']['name']), _(album['name']))] = '( %s )' % (' | '.join([title['name'] for title in album['titles']]))
+for album in albums.values():
+	rules['hciplayer.%s.%s' % (_(album['artist']['name']), _(album['name']))] = '( %s )' % (' | '.join([title['name'] for title in album['titles']]))
 
 
-
-
-temp = '( %s | %s | %s ) /filterValue' % (
-	' \n|\t '.join(['[song | track] %s /filterTitle [by [artist]  %s /filterArtist ] [ on [album] %s /filterAlbum ] ' % ( 
-				'<hciplayer.%s.%s.titles>' % (_(album['artist']['name']), _(album['name'])), 
-				'<hciplayer.%s>' % _(album['artist']['name']), 
-				'<hciplayer.%s.%s>' % (_(album['artist']['name']), _(album['name'])) ) for album in albums.values()] ),
-	' \n|\t '.join(['artist %s /filterArtist [ album %s /filterAlbum ] [ [song|track] %s /filterTitle ] ' % ( 
-				'<hciplayer.%s>' % _(album['artist']['name']), 
-				'<hciplayer.%s.%s>' % ( _(album['artist']['name']), _(album['name'])), 
-				'<hciplayer.%s.%s.titles>' % ( _(album['artist']['name']), _(album['name']) ) ) for album in albums.values()] ),
-	' \n|\t '.join(['album %s /filterAlbum [[song|track] %s /filterTitle ] ' % ( 
-				'<hciplayer.%s.%s>' % (_(album['artist']['name']),_(album['name'])), 
-				'<hciplayer.%s.%s.titles>' % (_(album['artist']['name']), _(album['name']))) for album in albums.values()] ),
+temp = '(  [song | songs | tracks | track] (%s) \n|\t  ( %s )  \n) /filterValue' % (
+	' |\n\t '.join([' %s /filterTitle [by [artist] ( %s ) /filterArtist ] [ on [album] ( %s ) /filterAlbum ] ' % ( '<hciplayer.%s.%s>' % (_(album['artist']['name']), _(album['name'])), album['artist']['name'], album['name'] ) for album in albums.values()] ),
+	' |\n\t '.join([' ( [artist | some]  (%s) /filterArtist [ [album] ( %s ) /filterAlbum ] | album ( %s ) /filterAlbum ) [ [song | track] %s /filterTitle ] ' % ( album['artist']['name'], album['name'], album['name'], '<hciplayer.%s.%s>' % (_(album['artist']['name']), _(album['name']))) for album in albums.values()] ),
+#	' |\n\t '.join([' album ( %s ) /filterAlbum [ [song | track]  %s /filterTitle ] ' % ( album['name'], '<hciplayer.%s.%s>' % (_(album['artist']['name']), _(album['name']))) for album in albums.values()] ),
 )
+
 print temp
+
 rules['filters'] = temp
 
 """#
@@ -261,12 +258,13 @@ rules['flters'] = (
 ) /filterValue
 """
 
+rules['filterplus'] = '<filters> [ [and] <filterplus>]'
 
-rules.commands['playItems'] = '( put on | play | could you play ) ( <selectors> | ( <filters> [ and ] ) + )'
+rules.commands['playItems'] = '( put on | play | could you play ) (<selectors> | <filterplus>)'
 
-rules.commands['queueItems'] = '( queue | play next ) ( <selectors> | ( <filters> [ and ] ) + )'
+rules.commands['queueItems'] = '( queue | play next ) (<selectors> | <filterplus>)'
 
-rules.commands['selectItems'] = '( select | filter ) ( <selectors> | ( <filters> [ and ] ) + )'
+rules.commands['selectItems'] = '( select | filter ) (<selectors> | <filterplus>)'
 
 rules.commands['listItems'] = 'list ( <selectors> | <filters> )'
 

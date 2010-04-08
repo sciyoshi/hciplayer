@@ -6,6 +6,9 @@ import urllib2
 import urlparse
 import tempfile
 import subprocess
+import psyco
+psyco.profile()
+
 
 jsgf = tempfile.TemporaryFile()
 
