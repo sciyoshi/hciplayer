@@ -6,7 +6,7 @@
 
 \title{HCIPlayer: Project Evolution}
 \author{ECSE424 Winter 2010, McGill University}
-\renewcommand{\today}{March 24th, 2010}
+\renewcommand{\today}{Updated: Tuesday, April 13th, 2010}
 \maketitle
 
 
@@ -51,19 +51,19 @@ Team Ocelot's device featured a brief tutorial, an automated hands-on walkthroug
 \section*{Evolution from Alpha to Beta}
 With feedback from Dalia and team e-Mall's evaluation with a test subject we identified a number of improvements that would improve the usability of the beta system. We made advances in the following areas:
 \subsection*{Errors}
-The alpha system suffered from stability issues, much of which was due to the transition from python to the iPhone's native Objective-C. While it made the errors more predictable, it greatly increased the complexity of the code. The errors encountered in the evaluation were numerous and again detracted from the ability of the evalution to test the interface usability rather than that of the whole system. The voice recognition performed very poorly. The tutorial did not function. Gesture recognition was quite poor. All of these have been fixed and are fully functional and reliable in the beta system.
+The alpha system suffered from stability issues, much of which was due to the transition from Python to the iPhone's native Objective-C. While it made the errors more predictable, it greatly increased the complexity of the code. The errors encountered in the evaluation were numerous and again detracted from the ability of the evaluation to test the interface usability rather than that of the whole system. The voice and gesture recognition performed very poorly and the tutorial did not function. All of these have been fixed and are fully functional and reliable in the beta system.
 
 \subsection*{Browsing}
-With a more robust and functional system to work with, we decided to add a way to browse artists and albums. This was originally planned in our low-fidelity prototype but was never implemented due to a lack of time. 
+With a more robust and functional system to work with, we decided to add a way to browse artists and albums. This makes it possible for the user to manage a much larger music collection by breaking that collection down so the user doesn't have to remember the name of every album and song by every artist. With the more complex states available in the device, the ``what can I say?'' command is now context-aware. This was originally planned in our low-fidelity prototype but was never implemented due to a lack of time. It is a system that would be very helpful to evaluate on users but it was regrettably not implemented in time.
 
 \subsection*{Visual Feedback}
-Use of visual feedback was increased in the beta system with the addition of a screen-width bar to indicate volume level. A question came up surrounding the icon use in the alpha system and whether it was consistent with the expectations of the user. To have a play arrow displayed could be seen as either a button while in the pause state or a status indicator in the play state. We came to the same conclusion as team e-Mall, which was to use them as indicators, showing the play icon when playing and the pause icon while stopped.
+Use of visual feedback was increased in the beta system with the addition of a high-contrast screen-width bar to indicate volume level. A question was raised surrounding the icon use in the alpha system and whether it was consistent with the expectations of the user. A play arrow displayed could be seen as either a button while in the pause state or a status indicator in the play state. We came to the same conclusion as team e-Mall, which was to use them as indicators, showing the play icon when playing and the pause icon while stopped.
 
 \subsection*{Voice Commands}
 The accepted grammar and vocabulary was greatly increased for the alpha system, allowing an array of options, should the user forget a command. Rather than requiring the user to issue a series of separate commands to add multiple items to the queue, they can be listed in a single command using the same flexible grammar offered for other commands. The system ignores commands that deviate too much from expected options to reduce the number of misunderstood commands, which are extremely detrimental to the usability.
 
-\subsection*{Audio Feedback}
-Team e-Mall commented on the lack of feedback to indicate when a number of actions are performed. This would help to reduce the negative effects of an improperly recognized action as well as increasing the user's confidence when using the system by eliminating ambiguity of its state. While the reliabilty of both speech and gesture recognition has improved greatly, it is still important to reinforce 
+\subsection*{Complementary Commands}
+With the addition of more flexible voice commands, we tried to be less insistent on a single correct way to do most things. The user manual doesn't cover all of the details of different ways to say things since the goal is not to confuse the user. More of this flexibility is lightly touched upon in the tutorial and it is hoped that it will catch mistakes and help the user to feel less confined. Replay, which used to be strictly a voice command is now complemented by the action swiping gesture for previous. This follows a more common model in players where the previous button will restart the track unless it is performed in the first few seconds.
 
 
 \end{document}
